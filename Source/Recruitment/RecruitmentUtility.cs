@@ -283,10 +283,6 @@ namespace Recruitment
             {
                 return "IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, pawn.Named("PAWN"));
             }
-            if (!PawnsFinder.AllMaps_FreeColonistsSpawned.Any(p => p != pawn))
-            {
-                return "Recruitment_EnvoyReason_LastColonist".Translate();
-            }
             if (!RCellFinder.TryFindBestExitSpot(pawn, out _))
             {
                 return "Recruitment_EnvoyReason_NoExit".Translate();

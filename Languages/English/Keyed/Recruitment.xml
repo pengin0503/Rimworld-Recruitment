@@ -25,6 +25,7 @@
   <Recruitment_EnvoyDispatched>{PAWN_labelShort} is heading out as an envoy.</Recruitment_EnvoyDispatched>
   <Recruitment_EnvoyLeft>{PAWN_labelShort} has left as an envoy and should be back in about {1}.</Recruitment_EnvoyLeft>
   <Recruitment_EnvoyCancelled>{0} stopped before leaving, so the envoy trip was called off. {1} silver was returned.</Recruitment_EnvoyCancelled>
+  <Recruitment_EnvoyStayed>{PAWN_labelShort} stayed behind because nobody else would be left at the colony. {1} silver was returned.</Recruitment_EnvoyStayed>
   <Recruitment_EnvoyWaiting>{PAWN_labelShort} has finished the envoy trip but there is no colony to return to. {PAWN_pronoun} will wait until there is one.</Recruitment_EnvoyWaiting>
   <Recruitment_EnvoyReturned>{PAWN_labelShort} has returned from the envoy trip.</Recruitment_EnvoyReturned>
   <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort} is coming back alone.</Recruitment_EnvoyReturnedAlone>

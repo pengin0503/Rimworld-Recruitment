@@ -25,6 +25,7 @@
   <Recruitment_EnvoyDispatched>{PAWN_labelShort}が使者として出発します。</Recruitment_EnvoyDispatched>
   <Recruitment_EnvoyLeft>{PAWN_labelShort}が使者として旅立ちました。およそ{1}後に戻ります。</Recruitment_EnvoyLeft>
   <Recruitment_EnvoyCancelled>{0}が出発前に止まったため、使者の派遣を取りやめました。{1}シルバーを返却しました。</Recruitment_EnvoyCancelled>
+  <Recruitment_EnvoyStayed>ほかに拠点に残る入植者がいなくなるため、{PAWN_labelShort}は出発を取りやめました。{1}シルバーを返却しました。</Recruitment_EnvoyStayed>
   <Recruitment_EnvoyWaiting>{PAWN_labelShort}は使者の務めを終えましたが、帰る拠点がありません。拠点ができるまで待機します。</Recruitment_EnvoyWaiting>
   <Recruitment_EnvoyReturned>{PAWN_labelShort}が使者の旅から戻りました。</Recruitment_EnvoyReturned>
   <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort}は1人で戻ってきます。</Recruitment_EnvoyReturnedAlone>

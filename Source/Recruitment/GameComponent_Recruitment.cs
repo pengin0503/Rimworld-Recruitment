@@ -143,7 +143,20 @@ namespace Recruitment
             {
                 return report;
             }
+            if (!AnyColonistStaysBehind(pawn))
+            {
+                return "Recruitment_EnvoyReason_LastColonist".Translate();
+            }
             return CanStart(RecruitmentDefOf.Recruitment_Envoy, pawn.Map, needsOriginLottery: true);
+        }
+
+        /// <summary>
+        /// Whether some free colonist other than <paramref name="envoy"/> stays on a map. Colonists already
+        /// walking out as envoys do not count, or two envoys sent together could leave nobody behind.
+        /// </summary>
+        private bool AnyColonistStaysBehind(Pawn envoy)
+        {
+            return PawnsFinder.AllMaps_FreeColonistsSpawned.Any(p => p != envoy && !IsEnvoy(p));
         }
 
         public bool TryDispatchEnvoy(Pawn pawn)
@@ -194,6 +207,14 @@ namespace Recruitment
             RecruitmentDrive drive = drives.FirstOrDefault(d => d.envoy == pawn && d.state == DriveState.EnvoyDeparting);
             if (drive == null)
             {
+                return;
+            }
+            // The others may have died or left while the envoy was walking out.
+            if (!AnyColonistStaysBehind(pawn))
+            {
+                drives.Remove(drive);
+                RecruitmentUtility.Refund(pawn.Map, pawn.Position, drive.paidSilver);
+                Messages.Message("Recruitment_EnvoyStayed".Translate(pawn.Named("PAWN"), drive.paidSilver), pawn, MessageTypeDefOf.NegativeEvent, historical: false);
                 return;
             }
             Depart(drive);
