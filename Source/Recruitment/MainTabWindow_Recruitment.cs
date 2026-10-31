@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using Recruitment.Logic;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -11,6 +13,11 @@ namespace Recruitment
         private Vector2 scrollPosition;
 
         private float viewHeight = 400f;
+
+        // Silver counts, the faction lottery and research lookups do not need to run every frame.
+        private readonly TimedCache<Map, AcceptanceReport> envoyReports = new TimedCache<Map, AcceptanceReport>(RecruitmentUI.CacheSeconds, () => RecruitmentUI.Now);
+
+        private readonly TimedCache<int, List<string>> methodLines = new TimedCache<int, List<string>>(RecruitmentUI.CacheSeconds, () => RecruitmentUI.Now);
 
         public override Vector2 RequestedTabSize => new Vector2(760f, 560f);
 
@@ -27,7 +34,7 @@ namespace Recruitment
             listing.Begin(viewRect);
 
             Map current = Find.CurrentMap;
-            AcceptanceReport envoyReport = current == null ? "Recruitment_Tab_NoMap".Translate() : component.CanStart(RecruitmentDefOf.Recruitment_Envoy, current, needsOriginLottery: true);
+            AcceptanceReport envoyReport = current == null ? "Recruitment_Tab_NoMap".Translate() : envoyReports.Get(current, () => component.CanStart(RecruitmentDefOf.Recruitment_Envoy, current, needsOriginLottery: true));
             Rect envoyButton = listing.GetRect(32f);
             envoyButton.width = 260f;
             if (envoyReport.Accepted)
@@ -65,17 +72,14 @@ namespace Recruitment
                 Widgets.Label(row.LeftPart(0.7f), "Recruitment_Tab_GroupLine".Translate(group.pawns.Count, group.method.LabelCap, Mathf.Max(0, group.TicksLeft).ToStringTicksToPeriod()));
                 if (Widgets.ButtonText(row.RightPart(0.28f), "Recruitment_Tab_Review".Translate()))
                 {
-                    Find.WindowStack.Add(new Dialog_Applicants(group));
+                    RecruitmentUI.OpenApplicants(group);
                 }
             }
 
             Heading(listing, "Recruitment_Tab_Methods");
-            foreach (RecruitmentMethodDef method in RecruitmentMethodDef.AllInOrder)
+            foreach (string line in methodLines.Get(0, MethodLines))
             {
-                FloatRange days = method.Days;
-                string research = method.ResearchFinished ? "" : " " + "Recruitment_Tab_NeedsResearch".Translate(method.MissingResearch.Select(r => r.LabelCap.Resolve()).ToCommaList()).Colorize(ColorLibrary.RedReadable);
-                listing.Label("Recruitment_Tab_MethodLine".Translate(method.LabelCap, method.Cost, days.min.ToString("0.#"), days.max.ToString("0.#")) + research);
-                listing.Label("    " + ("Recruitment_Tab_HowTo_" + method.startKind).Translate());
+                listing.Label(line);
             }
 
             viewHeight = listing.CurHeight + 10f;
@@ -106,6 +110,19 @@ namespace Recruitment
             {
                 component.DevArriveNow(drive);
             }
+        }
+
+        private static List<string> MethodLines()
+        {
+            var lines = new List<string>();
+            foreach (RecruitmentMethodDef method in RecruitmentMethodDef.AllInOrder)
+            {
+                FloatRange days = method.Days;
+                string research = method.ResearchFinished ? "" : " " + "Recruitment_Tab_NeedsResearch".Translate(method.MissingResearch.Select(r => r.LabelCap.Resolve()).ToCommaList()).Colorize(ColorLibrary.RedReadable);
+                lines.Add("Recruitment_Tab_MethodLine".Translate(method.LabelCap, method.Cost, days.min.ToString("0.#"), days.max.ToString("0.#")) + research);
+                lines.Add("    " + ("Recruitment_Tab_HowTo_" + method.startKind).Translate());
+            }
+            return lines;
         }
 
         private static void Heading(Listing_Standard listing, string key)

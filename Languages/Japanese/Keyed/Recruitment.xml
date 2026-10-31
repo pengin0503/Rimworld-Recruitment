@@ -14,6 +14,14 @@
   <Recruitment_Reason_NoFaction>応募者を送ってくれる派閥がありません</Recruitment_Reason_NoFaction>
   <Recruitment_Reason_ConsoleUnusable>通信機は今は使えません</Recruitment_Reason_ConsoleUnusable>
   <Recruitment_Reason_NoDestination>応募者が向かえる拠点がありません。</Recruitment_Reason_NoDestination>
+  <Recruitment_TraderLeft>商人が立ち去ったか交易をやめたため、{PAWN_labelShort}は募集を頼めませんでした。</Recruitment_TraderLeft>
+  <Recruitment_BroadcastInterrupted>通信機が使えなくなったため、{PAWN_labelShort}は放送を終えられませんでした。</Recruitment_BroadcastInterrupted>
+  <Recruitment_Confirm_Title>募集を開始しますか？</Recruitment_Confirm_Title>
+  <Recruitment_Confirm_Text>{0}\n\n費用: {1}シルバー（応募者が0人でも返却されません）\n期間: {2}〜{3}日\n到着: {4}</Recruitment_Confirm_Text>
+  <Recruitment_Confirm_Envoy>{PAWN_labelShort}は募集が終わるまで不在になります。</Recruitment_Confirm_Envoy>
+  <Recruitment_Alert_EnvoyAway>不在の使者: {0}人</Recruitment_Alert_EnvoyAway>
+  <Recruitment_Alert_EnvoyAwayDesc>次の入植者は使者として募集に出ており、応募者がいれば一緒に戻ってきます。クリックすると募集タブを開きます。</Recruitment_Alert_EnvoyAwayDesc>
+  <Recruitment_Alert_EnvoyWaiting>帰る拠点ができるのを待っています</Recruitment_Alert_EnvoyWaiting>
 
   <!-- 使者 -->
   <Recruitment_EnvoyReason_AlreadyEnvoy>すでに使者です</Recruitment_EnvoyReason_AlreadyEnvoy>
@@ -97,6 +105,9 @@
   <Recruitment_Settings_IncludePermanentEnemiesDesc>海賊など。初期設定はオフです。</Recruitment_Settings_IncludePermanentEnemiesDesc>
   <Recruitment_Settings_AllowChildren>子供の応募を許可する</Recruitment_Settings_AllowChildren>
   <Recruitment_Settings_AllowChildrenDesc>ストーリーテラーの設定で子供が許可されている場合のみ有効です。</Recruitment_Settings_AllowChildrenDesc>
+  <Recruitment_Settings_ConfirmExpensive>高額な募集の開始前に確認する</Recruitment_Settings_ConfirmExpensive>
+  <Recruitment_Settings_ConfirmExpensiveDesc>費用が下の額以上の募集を始める前に、費用・期間・到着方法を表示して確認します。0にすると常に確認します。</Recruitment_Settings_ConfirmExpensiveDesc>
+  <Recruitment_Settings_ConfirmThreshold>確認するシルバーの額（以上）</Recruitment_Settings_ConfirmThreshold>
   <Recruitment_Settings_Applicants>応募者の人数</Recruitment_Settings_Applicants>
   <Recruitment_Settings_ApplicantWeight>{0}人: 重み {1}（{2}）</Recruitment_Settings_ApplicantWeight>
   <Recruitment_Settings_Methods>費用と期間</Recruitment_Settings_Methods>

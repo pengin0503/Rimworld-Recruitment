@@ -19,6 +19,7 @@
     <arrivalModes>
       <li>EdgeWalkIn</li>
     </arrivalModes>
+    <arrivalLabel>walk in from the edge of the map</arrivalLabel>
     <uiOrder>10</uiOrder>
   </Recruitment.RecruitmentMethodDef>
 
@@ -35,6 +36,7 @@
     <arrivalModes>
       <li>EdgeWalkIn</li>
     </arrivalModes>
+    <arrivalLabel>walk in from the edge of the map with the envoy</arrivalLabel>
     <uiOrder>20</uiOrder>
   </Recruitment.RecruitmentMethodDef>
 
@@ -54,6 +56,7 @@
     <arrivalModes>
       <li>EdgeWalkIn</li>
     </arrivalModes>
+    <arrivalLabel>walk in from the edge of the map</arrivalLabel>
     <uiOrder>30</uiOrder>
   </Recruitment.RecruitmentMethodDef>
 
@@ -75,6 +78,7 @@
       <li>EdgeDrop</li>
       <li>RandomDrop</li>
     </arrivalModes>
+    <arrivalLabel>drop in by transport pod near the colony</arrivalLabel>
     <uiOrder>40</uiOrder>
   </Recruitment.RecruitmentMethodDef>
 

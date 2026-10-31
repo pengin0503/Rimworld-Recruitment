@@ -116,6 +116,15 @@ def vanilla_defs(data_path):
     return names
 
 
+def injected(language, def_type, key):
+    folder = ROOT / "Languages" / language / "DefInjected" / def_type
+    for path in folder.glob("*.xml"):
+        root = parse(path)
+        if root is not None and root.find(key) is not None:
+            return True
+    return False
+
+
 def csharp_types():
     types = set()
     for path in (ROOT / "Source").rglob("*.cs"):
@@ -145,6 +154,12 @@ def check_defs(data_path):
                 error(f"{name}: startJob {job} is not a JobDef in Defs/")
             if not node.findall("arrivalModes/li"):
                 error(f"{name}: arrivalModes is empty")
+            for field in ("label", "description", "arrivalLabel"):
+                if not node.findtext(field):
+                    error(f"{name}: {field} is not set")
+                for lang in LANGUAGES[1:]:
+                    if not injected(lang, tag, f"{name}.{field}"):
+                        error(f"{lang}: {name}.{field} has no DefInjected translation")
             refs = [li.text for li in node.findall("researchPrerequisites/li")] + [li.text for li in node.findall("arrivalModes/li")]
             if vanilla is not None:
                 for ref in refs:

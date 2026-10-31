@@ -13,13 +13,21 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          # The exact SDK from global.json, so the build is byte-identical to a correct local build.
+          global-json-file: global.json
 
       - name: Unit tests
         run: dotnet test Tests/Recruitment.Tests -c Release
 
       - name: Build mod assembly
         run: dotnet build Source/Recruitment -c Release
+
+      - name: Committed DLL matches the source
+        run: |
+          if ! git diff --quiet -- 1.7/Assemblies/Recruitment.dll; then
+            echo "::error::1.7/Assemblies/Recruitment.dll is out of date. Rebuild with 'dotnet build Source/Recruitment -c Release' (SDK $(dotnet --version)) and commit the DLL."
+            exit 1
+          fi
 
       - name: Static checks (XML, translations, def references)
         run: python3 tools/check_mod.py

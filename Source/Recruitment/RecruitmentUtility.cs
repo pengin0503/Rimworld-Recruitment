@@ -24,14 +24,35 @@ namespace Recruitment
         /// <summary>Silver the colony can spend on this map: not forbidden, and in storage or in the home area.</summary>
         public static List<Thing> SpendableSilver(Map map)
         {
-            return map.listerThings.ThingsOfDef(ThingDefOf.Silver)
-                .Where(t => t.Spawned && !t.IsForbidden(Faction.OfPlayer) && (t.IsInAnyStorage() || map.areaManager.Home[t.Position]))
-                .ToList();
+            var result = new List<Thing>();
+            foreach (Thing t in map.listerThings.ThingsOfDef(ThingDefOf.Silver))
+            {
+                if (IsSpendable(t, map))
+                {
+                    result.Add(t);
+                }
+            }
+            return result;
         }
 
+        /// <summary>Same as summing <see cref="SpendableSilver"/>, without building a list.</summary>
         public static int CountSpendableSilver(Map map)
         {
-            return SpendableSilver(map).Sum(t => t.stackCount);
+            int total = 0;
+            List<Thing> silver = map.listerThings.ThingsOfDef(ThingDefOf.Silver);
+            for (int i = 0; i < silver.Count; i++)
+            {
+                if (IsSpendable(silver[i], map))
+                {
+                    total += silver[i].stackCount;
+                }
+            }
+            return total;
+        }
+
+        private static bool IsSpendable(Thing t, Map map)
+        {
+            return t.Spawned && !t.IsForbidden(Faction.OfPlayer) && (t.IsInAnyStorage() || map.areaManager.Home[t.Position]);
         }
 
         public static bool TryPay(Map map, int cost)
@@ -66,9 +87,19 @@ namespace Recruitment
 
         public static void Refund(Map map, IntVec3 near, int amount)
         {
-            if (map == null || amount <= 0)
+            if (amount <= 0)
             {
                 return;
+            }
+            // The map may be gone (abandoned, or left behind by a gravship); refund to a colony that still exists.
+            if (map == null || !Find.Maps.Contains(map))
+            {
+                map = Find.AnyPlayerHomeMap;
+                near = IntVec3.Invalid;
+                if (map == null)
+                {
+                    return;
+                }
             }
             if (!near.IsValid || !near.InBounds(map))
             {
@@ -103,6 +134,20 @@ namespace Recruitment
             return FactionEligibility.IsEligible(traits, RecruitmentMod.Settings.includePermanentEnemies);
         }
 
+        /// <summary>Whether <see cref="EligibleOrigins"/> would be non-empty, stopping at the first match.</summary>
+        public static bool AnyEligibleOrigin(bool checkPermit)
+        {
+            List<Faction> factions = Find.FactionManager.AllFactionsListForReading;
+            for (int i = 0; i < factions.Count; i++)
+            {
+                if (IsEligibleOrigin(factions[i], checkPermit))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static List<Faction> EligibleOrigins(bool checkPermit)
         {
             return Find.FactionManager.AllFactionsListForReading.Where(f => IsEligibleOrigin(f, checkPermit)).ToList();
@@ -111,12 +156,23 @@ namespace Recruitment
         /// <summary>The royal permits this faction's caravan traders require (the Empire's need Knight or above).</summary>
         private static List<RoyalTitlePermitDef> TradePermits(Faction faction)
         {
-            return faction.def.caravanTraderKinds
-                .Where(k => k.permitRequiredForTrading != null)
-                .Select(k => k.permitRequiredForTrading)
-                .Distinct()
-                .ToList();
+            List<RoyalTitlePermitDef> permits = null;
+            foreach (TraderKindDef kind in faction.def.caravanTraderKinds)
+            {
+                RoyalTitlePermitDef permit = kind.permitRequiredForTrading;
+                if (permit != null)
+                {
+                    permits ??= new List<RoyalTitlePermitDef>();
+                    if (!permits.Contains(permit))
+                    {
+                        permits.Add(permit);
+                    }
+                }
+            }
+            return permits ?? NoPermits;
         }
+
+        private static readonly List<RoyalTitlePermitDef> NoPermits = new List<RoyalTitlePermitDef>();
 
         private static bool AnyColonistHasPermit(Faction faction, List<RoyalTitlePermitDef> permits)
         {
@@ -255,6 +311,39 @@ namespace Recruitment
 
         // ---- Envoys -------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Repairs what the game could not update while <paramref name="pawn"/> was held outside every map and the
+        /// world (game-wide pawn scans do not see them): deleted policies and a removed ideoligion.
+        /// </summary>
+        public static void Notify_BackFromAway(Pawn pawn)
+        {
+            Game game = Current.Game;
+            if (pawn.outfits != null && pawn.outfits.CurrentApparelPolicy != null && !game.outfitDatabase.AllOutfits.Contains(pawn.outfits.CurrentApparelPolicy))
+            {
+                pawn.outfits.CurrentApparelPolicy = null;
+            }
+            if (pawn.drugs != null && pawn.drugs.CurrentPolicy != null && !game.drugPolicyDatabase.AllPolicies.Contains(pawn.drugs.CurrentPolicy))
+            {
+                pawn.drugs.CurrentPolicy = null;
+            }
+            if (pawn.foodRestriction != null && pawn.foodRestriction.CurrentFoodPolicy != null && !game.foodRestrictionDatabase.AllFoodRestrictions.Contains(pawn.foodRestriction.CurrentFoodPolicy))
+            {
+                pawn.foodRestriction.CurrentFoodPolicy = null;
+            }
+            if (pawn.reading != null && pawn.reading.CurrentPolicy != null && !game.readingPolicyDatabase.AllReadingPolicies.Contains(pawn.reading.CurrentPolicy))
+            {
+                pawn.reading.CurrentPolicy = null;
+            }
+            if (ModsConfig.IdeologyActive && pawn.ideo != null && pawn.Ideo != null && !Find.IdeoManager.IdeosListForReading.Contains(pawn.Ideo))
+            {
+                Ideo fallback = Faction.OfPlayer.ideos?.PrimaryIdeo;
+                if (fallback != null)
+                {
+                    pawn.ideo.SetIdeo(fallback);
+                }
+            }
+        }
+
         public static int SocialLevel(Pawn pawn)
         {
             return pawn.skills?.GetSkill(SkillDefOf.Social)?.Level ?? 0;
@@ -283,7 +372,8 @@ namespace Recruitment
             {
                 return "IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, pawn.Named("PAWN"));
             }
-            if (!RCellFinder.TryFindBestExitSpot(pawn, out _))
+            // A cached region check; the actual exit cell is only searched for when the envoy is sent.
+            if (!pawn.Map.reachability.CanReachMapEdge(pawn.Position, TraverseParms.For(pawn)))
             {
                 return "Recruitment_EnvoyReason_NoExit".Translate();
             }
