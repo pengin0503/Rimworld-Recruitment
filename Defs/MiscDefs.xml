@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <LetterDef>
+    <defName>Recruitment_Applicants</defName>
+    <letterClass>Recruitment.Letter_Applicants</letterClass>
+    <color>(95, 151, 191)</color>
+    <flashColor>(106, 179, 231)</flashColor>
+    <flashInterval>90</flashInterval>
+    <arriveSound>LetterArrive_Good</arriveSound>
+  </LetterDef>
+
+  <MainButtonDef>
+    <defName>Recruitment</defName>
+    <label>recruitment</label>
+    <description>Start recruitment drives and review applicants.</description>
+    <tabWindowClass>Recruitment.MainTabWindow_Recruitment</tabWindowClass>
+    <order>85</order>
+    <minimized>false</minimized>
+  </MainButtonDef>
+
+</Defs>

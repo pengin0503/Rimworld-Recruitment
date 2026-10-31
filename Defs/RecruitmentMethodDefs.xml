@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!--
+    Recruitment methods. Cost (silver) and days are defaults; players can override them in the mod settings.
+    Other mods can patch these defs, e.g. to change researchPrerequisites.
+  -->
+
+  <Recruitment.RecruitmentMethodDef>
+    <defName>Recruitment_Caravan</defName>
+    <label>recruit through a trader</label>
+    <description>Ask a visiting trader to spread word of the colony on their travels. Applicants come from the trader's faction and walk in.</description>
+    <startKind>Trader</startKind>
+    <startJob>Recruitment_RequestFromTrader</startJob>
+    <baseCost>50</baseCost>
+    <baseDays>6~10</baseDays>
+    <allowSurface>true</allowSurface>
+    <allowSpace>false</allowSpace>
+    <arrivalModes>
+      <li>EdgeWalkIn</li>
+    </arrivalModes>
+    <uiOrder>10</uiOrder>
+  </Recruitment.RecruitmentMethodDef>
+
+  <Recruitment.RecruitmentMethodDef>
+    <defName>Recruitment_Envoy</defName>
+    <label>recruit with an envoy</label>
+    <description>Send a colonist out as an envoy. They are away for the whole drive and come back with any applicants. A better social skill makes the trip shorter and more likely to succeed.</description>
+    <startKind>Envoy</startKind>
+    <startJob>Recruitment_DepartAsEnvoy</startJob>
+    <baseCost>100</baseCost>
+    <baseDays>4~7</baseDays>
+    <allowSurface>true</allowSurface>
+    <allowSpace>false</allowSpace>
+    <arrivalModes>
+      <li>EdgeWalkIn</li>
+    </arrivalModes>
+    <uiOrder>20</uiOrder>
+  </Recruitment.RecruitmentMethodDef>
+
+  <Recruitment.RecruitmentMethodDef>
+    <defName>Recruitment_Radio</defName>
+    <label>radio broadcast</label>
+    <description>Broadcast a call for settlers from a powered comms console. Applicants walk in. Radio cannot reach the planet from space.</description>
+    <startKind>CommsConsole</startKind>
+    <startJob>Recruitment_BroadcastRadio</startJob>
+    <researchPrerequisites>
+      <li>MicroelectronicsBasics</li>
+    </researchPrerequisites>
+    <baseCost>250</baseCost>
+    <baseDays>3~5</baseDays>
+    <allowSurface>true</allowSurface>
+    <allowSpace>false</allowSpace>
+    <arrivalModes>
+      <li>EdgeWalkIn</li>
+    </arrivalModes>
+    <uiOrder>30</uiOrder>
+  </Recruitment.RecruitmentMethodDef>
+
+  <Recruitment.RecruitmentMethodDef>
+    <defName>Recruitment_Orbital</defName>
+    <label>orbital comms</label>
+    <description>Relay a call for settlers through orbit from a powered comms console. Applicants drop in by transport pod near the colony, and this also works from space.</description>
+    <startKind>CommsConsole</startKind>
+    <startJob>Recruitment_BroadcastOrbital</startJob>
+    <researchPrerequisites>
+      <li>ShipComputerCore</li>
+    </researchPrerequisites>
+    <baseCost>600</baseCost>
+    <baseDays>1~3</baseDays>
+    <allowSurface>true</allowSurface>
+    <allowSpace>true</allowSpace>
+    <arrivalModes>
+      <li>CenterDrop</li>
+      <li>EdgeDrop</li>
+      <li>RandomDrop</li>
+    </arrivalModes>
+    <uiOrder>40</uiOrder>
+  </Recruitment.RecruitmentMethodDef>
+
+</Defs>

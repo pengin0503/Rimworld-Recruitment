@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Colonist Recruitment</name>
+  <packageId>pengin0503.recruitment</packageId>
+  <author>pengin0503</author>
+  <url>https://github.com/pengin0503/Rimworld-Recruitment</url>
+  <modVersion>1.0.0</modVersion>
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+  <description>Replace lost colonists by recruiting new ones. Ask a visiting trader to spread the word, send a colonist out as an envoy, broadcast from a comms console, or reach the whole planet over orbital comms. Each method costs silver and takes some days; then 0 to 3 applicants arrive and you choose whom to accept.
+
+Applicants come from the world's factions, so their race, xenotype and ideoligion follow that faction - this works with races added by other mods without special support. No Harmony required.
+
+失った入植者を「募集」で補充できるようにします。来訪した商人に募集を頼む、入植者を使者として送り出す、通信機で放送する、軌道通信で惑星全体に呼びかける、の4方式があります。どの方式もシルバーと日数がかかり、0〜3人の応募者が到着したら、採用する人を選べます。
+
+応募者はワールドの派閥から来るため、種族・ゼノタイプ・思想はその派閥に従います。他MODで追加された種族にも、個別対応なしで対応します。Harmony は不要です。</description>
+</ModMetaData>

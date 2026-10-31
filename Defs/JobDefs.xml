@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <JobDef>
+    <defName>Recruitment_RequestFromTrader</defName>
+    <driverClass>Recruitment.JobDriver_RequestRecruitmentFromTrader</driverClass>
+    <reportString>asking TargetA to spread word of the colony.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+  </JobDef>
+
+  <JobDef>
+    <defName>Recruitment_BroadcastRadio</defName>
+    <driverClass>Recruitment.JobDriver_BroadcastRecruitment</driverClass>
+    <reportString>broadcasting a call for settlers.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+  </JobDef>
+
+  <JobDef>
+    <defName>Recruitment_BroadcastOrbital</defName>
+    <driverClass>Recruitment.JobDriver_BroadcastRecruitment</driverClass>
+    <reportString>sending a call for settlers through orbit.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+  </JobDef>
+
+  <JobDef>
+    <defName>Recruitment_DepartAsEnvoy</defName>
+    <driverClass>Recruitment.JobDriver_DepartAsEnvoy</driverClass>
+    <reportString>leaving as an envoy.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+  </JobDef>
+
+</Defs>

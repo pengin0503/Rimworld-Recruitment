@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Recruitment_RequestFromTrader.reportString>TargetAに入植地の募集を頼んでいる。</Recruitment_RequestFromTrader.reportString>
+  <Recruitment_BroadcastRadio.reportString>入植者募集を放送している。</Recruitment_BroadcastRadio.reportString>
+  <Recruitment_BroadcastOrbital.reportString>軌道経由で入植者募集を呼びかけている。</Recruitment_BroadcastOrbital.reportString>
+  <Recruitment_DepartAsEnvoy.reportString>使者として出発している。</Recruitment_DepartAsEnvoy.reportString>
+
+</LanguageData>
