@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # Manual run: the release (and its tag) is created from the selected commit.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to create, e.g. v1.0.0'
+        required: true
 
 permissions:
   contents: write
@@ -10,8 +16,37 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.version || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify manually selected release tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TAG" != v* ]] || ! git check-ref-format "refs/tags/$TAG"; then
+            echo "::error::Version must be a valid Git tag beginning with v."
+            exit 1
+          fi
+
+          # --exit-code returns 2 when the tag is absent; other errors fail closed.
+          if git ls-remote --exit-code --refs origin "refs/tags/$TAG" > /dev/null; then
+            git fetch --no-tags origin "refs/tags/$TAG"
+            tag_commit=$(git rev-parse "FETCH_HEAD^{commit}")
+            checkout_commit=$(git rev-parse HEAD)
+            if [[ "$tag_commit" != "$checkout_commit" ]]; then
+              echo "::error::The existing release tag points to a different commit."
+              exit 1
+            fi
+          else
+            status=$?
+            if [[ "$status" -ne 2 ]]; then
+              echo "::error::Unable to check the remote release tag (git exit $status)."
+              exit "$status"
+            fi
+          fi
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -27,12 +62,14 @@ jobs:
         run: |
           mkdir -p "dist/ColonistRecruitment"
           cp -r About 1.7 Defs Languages Patches Textures "dist/ColonistRecruitment/"
-          (cd dist && zip -r "ColonistRecruitment-${GITHUB_REF_NAME}.zip" ColonistRecruitment)
+          (cd dist && zip -r "ColonistRecruitment-${TAG}.zip" ColonistRecruitment)
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: Colonist Recruitment ${{ github.ref_name }}
-          files: dist/ColonistRecruitment-${{ github.ref_name }}.zip
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Colonist Recruitment ${{ env.TAG }}
+          files: dist/ColonistRecruitment-${{ env.TAG }}.zip
           body: |
             RimWorld 1.7 用。前提MOD: Harmony（brrainz.harmony）。
             zip を展開した `ColonistRecruitment` フォルダーを `RimWorld/Mods/` に置き、MOD 一覧で Harmony の下で有効にしてください。
