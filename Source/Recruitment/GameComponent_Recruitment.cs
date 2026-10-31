@@ -11,7 +11,7 @@ namespace Recruitment
     /// Owns all recruitment state: running drives, applicants waiting for a decision and settlement cooldowns.
     /// Waiting applicants are held here (not spawned, not world pawns) until the player decides on them.
     /// </summary>
-    public class GameComponent_Recruitment : GameComponent, IThingHolder
+    public partial class GameComponent_Recruitment : GameComponent, IThingHolder
     {
         private const int CheckInterval = 250;
 
@@ -151,6 +151,7 @@ namespace Recruitment
                 origin = origin,
                 applicantCount = RecruitmentUtility.RollApplicantCount(method, social),
                 paidSilver = paid,
+                plannedMapName = MapName(map),
                 startTick = now,
                 durationTicks = RecruitmentUtility.RollDurationTicks(method),
             };
@@ -171,7 +172,7 @@ namespace Recruitment
         /// Whether <paramref name="caravan"/> can ask <paramref name="settlement"/> to send settlers. With
         /// <paramref name="checkSilver"/> false the caravan's silver is ignored (used for the departure warning).
         /// </summary>
-        public AcceptanceReport CanRequestAt(Caravan caravan, Settlement settlement, bool checkSilver)
+        public AcceptanceReport CanRequestAt(Caravan caravan, Settlement settlement, bool checkSilver, Map chosenMap = null, bool destinationSelected = false)
         {
             RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Envoy;
             AcceptanceReport target = CanAskSettlement(settlement);
@@ -195,8 +196,8 @@ namespace Recruitment
                     return canTrade.Reason.NullOrEmpty() ? "Recruitment_Reason_NoNegotiator".Translate().Resolve() : canTrade.Reason;
                 }
             }
-            Map destination = RecruitmentUtility.ResolveDestination(method, null);
-            if (destination == null)
+            Map destination = destinationSelected ? chosenMap : RecruitmentUtility.ResolveStartDestination(method);
+            if (destination == null || !Find.Maps.Contains(destination) || !destination.IsPlayerHome)
             {
                 return "Recruitment_Reason_NoDestination".Translate();
             }
@@ -242,9 +243,9 @@ namespace Recruitment
         }
 
         /// <summary>Called when an envoy caravan arrives at (or is already visiting) a settlement and asks for settlers.</summary>
-        public bool TryRequestAt(Caravan caravan, Settlement settlement)
+        public bool TryRequestAt(Caravan caravan, Settlement settlement, Map chosenMap = null, bool destinationSelected = false)
         {
-            AcceptanceReport report = CanRequestAt(caravan, settlement, checkSilver: true);
+            AcceptanceReport report = CanRequestAt(caravan, settlement, checkSilver: true, chosenMap, destinationSelected);
             if (!report.Accepted)
             {
                 if (!report.Reason.NullOrEmpty())
@@ -261,7 +262,7 @@ namespace Recruitment
                 return false;
             }
             Pawn negotiator = BestCaravanPawnUtility.FindBestNegotiator(caravan, settlement.Faction, settlement.TraderKind);
-            Map destination = RecruitmentUtility.ResolveDestination(method, null);
+            Map destination = destinationSelected ? chosenMap : RecruitmentUtility.ResolveStartDestination(method);
             RecruitmentDrive drive = AddDrive(method, destination, settlement.Faction, cost, RecruitmentUtility.SocialLevel(negotiator));
             settlementRequests[settlement.ID] = Find.TickManager.TicksGame;
             Messages.Message("Recruitment_EnvoyRequested".Translate(negotiator.Named("PAWN"), settlement.Label, drive.durationTicks.ToStringTicksToPeriod()), caravan, MessageTypeDefOf.TaskCompletion, historical: false);
@@ -276,7 +277,7 @@ namespace Recruitment
             // Deadlines are checked every tick (the list is tiny) so applicants leave exactly when their letter expires.
             for (int i = groups.Count - 1; i >= 0; i--)
             {
-                if (i < groups.Count && now >= groups[i].deadlineTick)
+                if (i < groups.Count && !groups[i].decisionStarted && now >= groups[i].deadlineTick)
                 {
                     Decide(groups[i], new List<Pawn>(), expired: true);
                 }
@@ -284,6 +285,10 @@ namespace Recruitment
             if (now % CheckInterval != 0)
             {
                 return;
+            }
+            foreach (ApplicantGroup group in groups.Where(g => g.decisionStarted).ToList())
+            {
+                ProcessDecision(group);
             }
             if (legacyCheckPending)
             {
@@ -390,39 +395,9 @@ namespace Recruitment
             }
             foreach (Pawn pawn in pawns)
             {
-                if (pawn.Faction == Faction.OfPlayer)
-                {
-                    RecruitmentUtility.Notify_BackFromAway(pawn);
-                }
-            }
-            try
-            {
-                RecruitmentUtility.Arrive(pawns, map, method);
-            }
-            catch (System.Exception e)
-            {
-                Log.ErrorOnce($"[Recruitment] Arrival on {map} failed; placing the pawns directly. {e}", pawns[0].thingIDNumber ^ 0x41525256);
-            }
-            foreach (Pawn pawn in pawns)
-            {
-                if (pawn.Spawned || pawn.Destroyed || pawn.holdingOwner != null)
-                {
-                    continue;
-                }
-                try
-                {
-                    GenPlace.TryPlaceThing(pawn, DropCellFinder.TradeDropSpot(map), map, ThingPlaceMode.Near);
-                }
-                catch (System.Exception e)
-                {
-                    // Retried every check while it keeps failing, so report it once per pawn.
-                    Log.ErrorOnce($"[Recruitment] Could not place {pawn}; keeping them to try again later. {e}", pawn.thingIDNumber ^ 0x52454352);
-                }
-                if (!pawn.Spawned && !pawn.Destroyed && pawn.holdingOwner == null)
-                {
+                if (pawn.holdingOwner == null && !pawn.Spawned && !pawn.Destroyed)
                     heldPawns.TryAdd(pawn);
-                    orphanCheckPending = true;
-                }
+                TryDeliver(pawn, map, method);
             }
         }
 
@@ -436,20 +411,31 @@ namespace Recruitment
                 {
                     return;
                 }
+                RecordHistory(DriveHistory(drive), RecruitmentOutcome.NoDestination);
                 drives.Remove(drive);
                 Find.LetterStack.ReceiveLetter("Recruitment_LetterFailedLabel".Translate(), "Recruitment_LetterNoDestination".Translate(drive.method.label), LetterDefOf.NegativeEvent);
                 return;
             }
-            drives.Remove(drive);
-
             Faction origin = drive.applicantCount > 0 ? ValidOrigin(drive) : null;
-            var applicants = new List<Pawn>();
+            var group = new ApplicantGroup
+            {
+                id = nextId++, method = drive.method, map = dest,
+                deadlineTick = Find.TickManager.TicksGame + RecruitmentMod.Settings.DecisionTicks,
+                autoJoin = RecruitmentMod.Settings.joinMode == JoinMode.AutoJoin,
+                historyEntry = DriveHistory(drive),
+            };
+            group.historyEntry.actualMap = MapName(dest);
+            group.historyEntry.originName = origin?.Name ?? "";
+            groups.Add(group);
+            drives.Remove(drive);
+            List<Pawn> applicants = group.pawns;
             for (int i = 0; i < drive.applicantCount; i++)
             {
                 // Generation failures are logged and skipped.
                 Pawn pawn = RecruitmentUtility.TryGenerateApplicant(origin, dest);
                 if (pawn == null)
                 {
+                    group.historyEntry.generationFailures++;
                     continue;
                 }
                 if (pawn.IsWorldPawn())
@@ -457,38 +443,31 @@ namespace Recruitment
                     Find.WorldPawns.RemovePawn(pawn);
                 }
                 applicants.Add(pawn);
+                if (!heldPawns.TryAdd(pawn) && pawn.holdingOwner == null && !pawn.Spawned && !pawn.Destroyed)
+                {
+                    // A modded container can reject an add; WorldPawns is a second deep-saving owner.
+                    Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
+                    Log.Warning($"[Recruitment] Keeping generated applicant {pawn} in WorldPawns until delivery.");
+                }
             }
 
+            group.historyEntry.arrived = applicants.Count;
             if (applicants.Count == 0)
             {
+                RecordHistory(group.historyEntry, drive.applicantCount == 0 ? RecruitmentOutcome.NoApplicants : RecruitmentOutcome.GenerationFailed);
+                groups.Remove(group);
                 Find.LetterStack.ReceiveLetter("Recruitment_LetterFailedLabel".Translate(), "Recruitment_LetterNoApplicants".Translate(drive.method.label), LetterDefOf.NegativeEvent);
                 return;
             }
 
-            if (RecruitmentMod.Settings.joinMode == JoinMode.AutoJoin)
+            if (group.autoJoin)
             {
-                foreach (Pawn pawn in applicants)
-                {
-                    pawn.SetFaction(Faction.OfPlayer);
-                }
-                BringHome(applicants, dest, drive.method);
-                SendJoinedLetter(applicants, drive.method);
+                group.decisionStarted = true;
+                group.acceptedPawns.AddRange(applicants);
+                ProcessDecision(group);
                 return;
             }
 
-            foreach (Pawn pawn in applicants)
-            {
-                heldPawns.TryAdd(pawn);
-            }
-            var group = new ApplicantGroup
-            {
-                id = nextId++,
-                method = drive.method,
-                map = dest,
-                pawns = applicants,
-                deadlineTick = Find.TickManager.TicksGame + RecruitmentMod.Settings.DecisionTicks,
-            };
-            groups.Add(group);
             Letter_Applicants.Send(group, origin);
         }
 
@@ -512,55 +491,18 @@ namespace Recruitment
         /// </summary>
         public AcceptanceReport Decide(ApplicantGroup group, ICollection<Pawn> accepted, bool expired)
         {
-            List<Pawn> joining = group.pawns.Where(p => accepted.Contains(p) && !p.Destroyed).ToList();
-            Map dest = null;
-            if (joining.Count > 0)
+            if (!groups.Contains(group)) return true;
+            if (!group.decisionStarted)
             {
-                dest = RecruitmentUtility.ResolveDestination(group.method, group.map);
-                if (dest == null)
-                {
-                    if (!expired)
-                    {
-                        return "Recruitment_Reason_NoDestination".Translate();
-                    }
-                    joining.Clear();
-                }
+                List<Pawn> joining = group.pawns.Where(p => accepted.Contains(p) && !p.Destroyed).ToList();
+                if (joining.Count > 0 && RecruitmentUtility.ResolveDestination(group.method, group.map) == null)
+                    return "Recruitment_Reason_NoDestination".Translate();
+                // Persist the choice before any fallible pawn callbacks. Retries never change it.
+                group.acceptedPawns = joining;
+                group.decisionExpired = expired;
+                group.decisionStarted = true;
             }
-
-            groups.Remove(group);
-            foreach (Letter letter in Find.LetterStack.LettersListForReading.OfType<Letter_Applicants>().Where(l => l.groupId == group.id).ToList())
-            {
-                Find.LetterStack.RemoveLetter(letter);
-            }
-            foreach (Pawn pawn in group.pawns)
-            {
-                if (heldPawns.Contains(pawn))
-                {
-                    heldPawns.Remove(pawn);
-                }
-            }
-
-            foreach (Pawn pawn in joining)
-            {
-                pawn.SetFaction(Faction.OfPlayer);
-            }
-            if (joining.Count > 0)
-            {
-                BringHome(joining, dest, group.method);
-                SendJoinedLetter(joining, group.method);
-            }
-
-            List<Pawn> leaving = group.pawns.Where(p => !joining.Contains(p) && !p.Destroyed).ToList();
-            foreach (Pawn pawn in leaving)
-            {
-                PawnDiedOrDownedThoughtsUtility.TryGiveThoughts(pawn, null, PawnDiedOrDownedThoughtsKind.DeniedJoining);
-                Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
-            }
-            if (expired && leaving.Count > 0)
-            {
-                Messages.Message("Recruitment_ApplicantsLeft".Translate(leaving.Count), MessageTypeDefOf.NeutralEvent);
-            }
-            return true;
+            return ProcessDecision(group) ? (AcceptanceReport)true : "Recruitment_Reason_RecoveryPending".Translate();
         }
 
         private static void SendJoinedLetter(List<Pawn> joined, RecruitmentMethodDef method)
@@ -581,6 +523,7 @@ namespace Recruitment
         public override void ExposeData()
         {
             base.ExposeData();
+            ExposeHistory();
             Scribe_Deep.Look(ref heldPawns, "heldPawns", this);
             Scribe_Collections.Look(ref drives, "drives", LookMode.Deep);
             Scribe_Collections.Look(ref groups, "groups", LookMode.Deep);

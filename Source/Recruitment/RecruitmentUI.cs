@@ -31,6 +31,23 @@ namespace Recruitment
             Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, action, title: "Recruitment_Confirm_Title".Translate()));
         }
 
+        public static void ChooseDestination(Action<Map> action)
+        {
+            var maps = RecruitmentUtility.StartDestinations(RecruitmentDefOf.Recruitment_Envoy);
+            if (maps.Count == 0)
+            {
+                Messages.Message("Recruitment_Reason_NoDestination".Translate(), RimWorld.MessageTypeDefOf.RejectInput, historical: false);
+                return;
+            }
+            if (maps.Count == 1)
+            {
+                action(maps[0]);
+                return;
+            }
+            Find.WindowStack.Add(new FloatMenu(maps.Select(map => new FloatMenuOption(
+                "Recruitment_DestinationOption".Translate(map.Parent.LabelCap), () => action(map))).ToList()));
+        }
+
         /// <summary>Opens the review dialog for <paramref name="group"/> unless it is already open.</summary>
         public static void OpenApplicants(ApplicantGroup group)
         {

@@ -32,6 +32,8 @@ namespace Recruitment
 
         public int paidSilver;
 
+        public string plannedMapName;
+
         public int startTick;
 
         public int durationTicks;
@@ -56,6 +58,7 @@ namespace Recruitment
             Scribe_References.Look(ref origin, "origin");
             Scribe_Values.Look(ref applicantCount, "applicantCount");
             Scribe_Values.Look(ref paidSilver, "paidSilver");
+            Scribe_Values.Look(ref plannedMapName, "plannedMapName");
             Scribe_Values.Look(ref startTick, "startTick");
             Scribe_Values.Look(ref durationTicks, "durationTicks");
             Scribe_Values.Look(ref arrivalTick, "arrivalTick", -1);

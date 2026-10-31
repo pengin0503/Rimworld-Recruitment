@@ -130,4 +130,20 @@
 
   <Recruitment_Settings_EnvoyCooldown>同じ拠点に再び依頼できるまでの日数: {0}</Recruitment_Settings_EnvoyCooldown>
 
+  <Recruitment_DestinationOption>応募者の到着先：{0}</Recruitment_DestinationOption>
+  <Recruitment_Reason_RecoveryPending>採否は保存済みです。一部の応募者の移送に失敗したため、自動で再試行します。</Recruitment_Reason_RecoveryPending>
+  <Recruitment_Dialog_Retry>保存済みの採否で再試行</Recruitment_Dialog_Retry>
+  <Recruitment_History_Title>募集履歴（最新100件）</Recruitment_History_Title>
+  <Recruitment_History_Unknown>記録なし・該当なし</Recruitment_History_Unknown>
+  <Recruitment_History_Summary>{0}：{1} ／ 支払額：{2}シルバー</Recruitment_History_Summary>
+  <Recruitment_History_Route>出身：{0} ／ 予定到着先：{1} ／ 実際：{2}</Recruitment_History_Route>
+  <Recruitment_History_Counts>到着：{0}人 ／ 採用：{1}人 ／ 不採用：{2}人 ／ 期限切れ：{3}人 ／ 生成失敗：{4}人</Recruitment_History_Counts>
+  <Recruitment_History_Times>開始：経過{0}日目 ／ 最終結果：経過{1}日目</Recruitment_History_Times>
+  <Recruitment_History_Result_Completed>採否確定</Recruitment_History_Result_Completed>
+  <Recruitment_History_Result_AutoJoined>自動加入</Recruitment_History_Result_AutoJoined>
+  <Recruitment_History_Result_Expired>判断期限切れ</Recruitment_History_Result_Expired>
+  <Recruitment_History_Result_NoApplicants>応募者0人</Recruitment_History_Result_NoApplicants>
+  <Recruitment_History_Result_NoDestination>到着先消失</Recruitment_History_Result_NoDestination>
+  <Recruitment_History_Result_GenerationFailed>応募者生成失敗</Recruitment_History_Result_GenerationFailed>
+  <Recruitment_History_Result_RecoveryPending>移送の回復待ち</Recruitment_History_Result_RecoveryPending>
 </LanguageData>

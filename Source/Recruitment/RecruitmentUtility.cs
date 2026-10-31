@@ -279,6 +279,22 @@ namespace Recruitment
             return id == null ? null : Find.Maps.FirstOrDefault(m => m.uniqueID == id.Value);
         }
 
+        public static List<Map> StartDestinations(RecruitmentMethodDef method)
+        {
+            GameComponent_Recruitment component = GameComponent_Recruitment.Instance;
+            return Find.Maps.Where(m => m.IsPlayerHome && method.AllowsMap(m)
+                && component.ActiveDrivesOn(m) < RecruitmentMod.Settings.maxConcurrentPerMap)
+                .OrderByDescending(m => m.mapPawns.FreeColonistsSpawnedCount).ThenBy(m => m.uniqueID).ToList();
+        }
+
+        public static Map ResolveStartDestination(RecruitmentMethodDef method)
+        {
+            var candidates = Find.Maps.Select(m => new MapCandidate(m.uniqueID, m.IsPlayerHome, m.IsSpace(),
+                m.mapPawns.FreeColonistsSpawnedCount, GameComponent_Recruitment.Instance.ActiveDrivesOn(m) < RecruitmentMod.Settings.maxConcurrentPerMap));
+            int? id = DestinationPicker.Pick(candidates, -1, method.allowSurface, method.allowSpace, requireCapacity: true);
+            return id == null ? null : Find.Maps.FirstOrDefault(m => m.uniqueID == id.Value);
+        }
+
         // ---- Applicants ---------------------------------------------------------------------------------
 
         public static int RollApplicantCount(RecruitmentMethodDef method, int envoySocial)

@@ -52,6 +52,9 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Unit tests
+        run: dotnet test Tests/Recruitment.Tests -c Release
+
       - name: Build and verify the committed DLL
         run: |
           dotnet build Source/Recruitment -c Release

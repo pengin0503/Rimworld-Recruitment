@@ -8,6 +8,21 @@ namespace Recruitment.Tests
         private static MapCandidate Home(int id, int colonists, bool space = false) => new MapCandidate(id, true, space, colonists);
 
         [Fact]
+        public void StartSkipsFullHomeButArrivalCanStillUseIt()
+        {
+            var maps = new[] { new MapCandidate(1, true, false, 9, hasCapacity: false), Home(2, 1) };
+            Assert.Equal(2, DestinationPicker.Pick(maps, -1, true, false, requireCapacity: true));
+            Assert.Equal(1, DestinationPicker.Pick(maps, 1, true, false));
+        }
+
+        [Fact]
+        public void AllFullHomesRejectNewRequests()
+        {
+            var maps = new[] { new MapCandidate(1, true, false, 9, hasCapacity: false) };
+            Assert.Null(DestinationPicker.Pick(maps, -1, true, false, requireCapacity: true));
+        }
+
+        [Fact]
         public void OriginalMapIsKeptWhenStillSuitable()
         {
             var maps = new[] { Home(1, 2), Home(2, 9) };

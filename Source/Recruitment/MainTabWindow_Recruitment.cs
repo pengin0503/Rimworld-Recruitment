@@ -14,6 +14,8 @@ namespace Recruitment
 
         private float viewHeight = 400f;
 
+        private readonly Dictionary<RecruitmentHistoryEntry, string> historyText = new Dictionary<RecruitmentHistoryEntry, string>();
+
         // Research lookups and translations do not need to run every frame.
         private readonly TimedCache<int, List<string>> methodLines = new TimedCache<int, List<string>>(RecruitmentUI.CacheSeconds, () => RecruitmentUI.Now);
 
@@ -62,9 +64,46 @@ namespace Recruitment
                 listing.Label(line);
             }
 
+            Heading(listing, "Recruitment_History_Title");
+            if (component.History.Count == 0) listing.Label("Recruitment_Tab_None".Translate());
+            if (historyText.Count > GameComponent_Recruitment.HistoryLimit * 2) historyText.Clear();
+            for (int i = component.History.Count - 1; i >= 0; i--)
+            {
+                RecruitmentHistoryEntry entry = component.History[i];
+                if (!historyText.TryGetValue(entry, out string description))
+                {
+                    description = HistoryDescription(entry);
+                    historyText[entry] = description;
+                }
+                listing.Label(description);
+                listing.GapLine(6f);
+            }
+
             viewHeight = listing.CurHeight + 10f;
             listing.End();
             Widgets.EndScrollView();
+        }
+
+        private static string HistoryDescription(RecruitmentHistoryEntry entry)
+        {
+            string unknown = "Recruitment_History_Unknown".Translate();
+            string result = entry.outcome switch
+            {
+                RecruitmentOutcome.AutoJoined => "Recruitment_History_Result_AutoJoined".Translate(),
+                RecruitmentOutcome.Expired => "Recruitment_History_Result_Expired".Translate(),
+                RecruitmentOutcome.NoApplicants => "Recruitment_History_Result_NoApplicants".Translate(),
+                RecruitmentOutcome.NoDestination => "Recruitment_History_Result_NoDestination".Translate(),
+                RecruitmentOutcome.GenerationFailed => "Recruitment_History_Result_GenerationFailed".Translate(),
+                RecruitmentOutcome.RecoveryPending => "Recruitment_History_Result_RecoveryPending".Translate(),
+                _ => "Recruitment_History_Result_Completed".Translate(),
+            };
+            string origin = entry.originName.NullOrEmpty() ? unknown : entry.originName;
+            string planned = entry.plannedMap.NullOrEmpty() ? unknown : entry.plannedMap;
+            string actual = entry.actualMap.NullOrEmpty() ? unknown : entry.actualMap;
+            return "Recruitment_History_Summary".Translate(entry.methodLabel, result, entry.paidSilver < 0 ? unknown : entry.paidSilver.ToString())
+                + "\n" + "Recruitment_History_Route".Translate(origin, planned, actual)
+                + "\n" + "Recruitment_History_Counts".Translate(entry.arrived, entry.joined, entry.rejected, entry.expired, entry.generationFailures)
+                + "\n" + "Recruitment_History_Times".Translate(entry.startTick < 0 ? unknown : (entry.startTick / 60000f + 1f).ToString("0.##"), entry.completionTick < 0 ? unknown : (entry.completionTick / 60000f + 1f).ToString("0.##"));
         }
 
         private static void DrawDrive(Listing_Standard listing, GameComponent_Recruitment component, RecruitmentDrive drive)
