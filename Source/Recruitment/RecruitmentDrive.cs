@@ -5,7 +5,7 @@ namespace Recruitment
 {
     public enum DriveState
     {
-        /// <summary>The envoy is walking to the map edge; the arrival time is set once they leave.</summary>
+        /// <summary>Legacy (old saves only): an envoy walking to the map edge before envoys travelled by caravan.</summary>
         EnvoyDeparting,
 
         /// <summary>The drive is running and applicants arrive at <see cref="RecruitmentDrive.arrivalTick"/>.</summary>
@@ -38,15 +38,10 @@ namespace Recruitment
 
         public int arrivalTick = -1;
 
+        /// <summary>Legacy (old saves only): the envoy of a pre-caravan envoy trip. Settled after loading.</summary>
         public Pawn envoy;
 
-        /// <summary>Up to when the away envoy has been aged (see <see cref="Logic.MothballSchedule"/>).</summary>
-        public int lastAgedTick;
-
-        /// <summary>Set once the player has been told that the envoy is waiting for a home to return to.</summary>
-        public bool envoyWaitingNotified;
-
-        public int TicksUntilArrival => state == DriveState.Underway ? arrivalTick - Find.TickManager.TicksGame : durationTicks;
+        public int TicksUntilArrival => arrivalTick - Find.TickManager.TicksGame;
 
         public void ExposeData()
         {
@@ -65,13 +60,6 @@ namespace Recruitment
             Scribe_Values.Look(ref durationTicks, "durationTicks");
             Scribe_Values.Look(ref arrivalTick, "arrivalTick", -1);
             Scribe_References.Look(ref envoy, "envoy");
-            // Saves from before aging existed have no value; aging then starts from the trip's start.
-            Scribe_Values.Look(ref lastAgedTick, "lastAgedTick", -1);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && lastAgedTick < 0)
-            {
-                lastAgedTick = startTick;
-            }
-            Scribe_Values.Look(ref envoyWaitingNotified, "envoyWaitingNotified");
         }
     }
 }

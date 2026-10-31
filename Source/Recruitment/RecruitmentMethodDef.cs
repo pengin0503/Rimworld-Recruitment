@@ -10,10 +10,10 @@ namespace Recruitment
         /// <summary>A colonist asks a visiting trader.</summary>
         Trader,
 
-        /// <summary>A colonist leaves the map as an envoy and comes back with the applicants.</summary>
+        /// <summary>A caravan travels to a settlement and asks it to send settlers.</summary>
         Envoy,
 
-        /// <summary>A colonist uses a powered comms console.</summary>
+        /// <summary>A colonist uses a powered comms console (the "call for settlers" contact).</summary>
         CommsConsole,
     }
 
@@ -22,7 +22,7 @@ namespace Recruitment
     {
         public RecruitmentStartKind startKind;
 
-        /// <summary>The job a colonist does to start this drive (unused for envoys, who use <see cref="startJob"/> to walk out).</summary>
+        /// <summary>The job a colonist does to ask a trader. Only trader methods use it.</summary>
         public JobDef startJob;
 
         public List<ResearchProjectDef> researchPrerequisites = new List<ResearchProjectDef>();
@@ -67,9 +67,9 @@ namespace Recruitment
             {
                 yield return error;
             }
-            if (startJob == null)
+            if (startKind == RecruitmentStartKind.Trader && startJob == null)
             {
-                yield return "startJob is not set.";
+                yield return "startJob is not set (needed by trader methods).";
             }
             if (arrivalLabel.NullOrEmpty())
             {

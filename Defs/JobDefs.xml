@@ -8,6 +8,7 @@
     <casualInterruptible>false</casualInterruptible>
   </JobDef>
 
+  <!-- Legacy: radio/orbital now start from the comms console's contact list; kept for old saves. -->
   <JobDef>
     <defName>Recruitment_BroadcastRadio</defName>
     <driverClass>Recruitment.JobDriver_BroadcastRecruitment</driverClass>
@@ -22,6 +23,7 @@
     <casualInterruptible>false</casualInterruptible>
   </JobDef>
 
+  <!-- Legacy: kept so saves from before envoys travelled by caravan still load. -->
   <JobDef>
     <defName>Recruitment_DepartAsEnvoy</defName>
     <driverClass>Recruitment.JobDriver_DepartAsEnvoy</driverClass>

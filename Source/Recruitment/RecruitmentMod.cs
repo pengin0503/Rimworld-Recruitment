@@ -18,6 +18,7 @@ namespace Recruitment
         public RecruitmentMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RecruitmentSettings>();
+            new HarmonyLib.Harmony("pengin0503.recruitment").PatchAll(typeof(RecruitmentMod).Assembly);
         }
 
         public override string SettingsCategory()
@@ -94,12 +95,11 @@ namespace Recruitment
             }
 
             Heading(listing, "Recruitment_Settings_Envoy");
-            s.envoyDurationFactorAtZero = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyDurationAtZero".Translate(s.envoyDurationFactorAtZero.ToStringPercent()), s.envoyDurationFactorAtZero, 0.1f, 3f));
-            s.envoyDurationFactorPerLevel = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyDurationPerLevel".Translate(s.envoyDurationFactorPerLevel.ToStringPercent("0.#")), s.envoyDurationFactorPerLevel, 0f, 0.1f), 1000f);
             s.envoyZeroChanceAtZero = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyZeroAtZero".Translate(s.envoyZeroChanceAtZero.ToStringPercent()), s.envoyZeroChanceAtZero, 0f, 1f));
             s.envoyZeroChancePerLevel = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyZeroPerLevel".Translate(s.envoyZeroChancePerLevel.ToStringPercent("0.#")), s.envoyZeroChancePerLevel, 0f, 0.1f), 1000f);
             EnvoySocialCurve curve = s.EnvoyCurve;
-            listing.Label("Recruitment_Settings_EnvoyPreview".Translate(curve.DurationFactor(0).ToStringPercent(), curve.ZeroChance(0).ToStringPercent(), curve.DurationFactor(10).ToStringPercent(), curve.ZeroChance(10).ToStringPercent(), curve.DurationFactor(20).ToStringPercent(), curve.ZeroChance(20).ToStringPercent()));
+            listing.Label("Recruitment_Settings_EnvoyPreview".Translate(curve.ZeroChance(0).ToStringPercent(), curve.ZeroChance(10).ToStringPercent(), curve.ZeroChance(20).ToStringPercent()));
+            s.envoyCooldownDays = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_EnvoyCooldown".Translate(s.envoyCooldownDays.ToString("0")), s.envoyCooldownDays, 0f, 60f));
 
             listing.GapLine();
             if (listing.ButtonText("Recruitment_Settings_Reset".Translate()))

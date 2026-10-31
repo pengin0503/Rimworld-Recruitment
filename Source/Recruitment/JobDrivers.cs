@@ -52,7 +52,11 @@ namespace Recruitment
         }
     }
 
-    /// <summary>Use a comms console to broadcast a call for settlers. Target A: the console.</summary>
+    /// <summary>
+    /// Legacy: radio and orbital drives used to be started with this job from the console's menu. They now go
+    /// through the comms console's own contact list (<see cref="RecruitmentCommTarget"/>); this stays so that
+    /// saves with the job in progress still load and finish it. Target A: the console.
+    /// </summary>
     public class JobDriver_BroadcastRecruitment : JobDriver
     {
         private const int BroadcastTicks = 300;
@@ -90,7 +94,10 @@ namespace Recruitment
         }
     }
 
-    /// <summary>Walk off the map as an envoy. Target A: the exit cell.</summary>
+    /// <summary>
+    /// Legacy: envoys used to walk off the map with this job. Kept so saves with the job in progress still load;
+    /// <see cref="GameComponent_Recruitment"/> refunds such trips after loading, and the job ends at once.
+    /// </summary>
     public class JobDriver_DepartAsEnvoy : JobDriver
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -100,11 +107,9 @@ namespace Recruitment
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-            Toil leave = ToilMaker.MakeToil("DepartAsEnvoy");
-            leave.initAction = () => GameComponent_Recruitment.Instance.Notify_EnvoyReachedExit(pawn);
-            leave.defaultCompleteMode = ToilCompleteMode.Instant;
-            yield return leave;
+            Toil end = ToilMaker.MakeToil("LegacyDepartAsEnvoy");
+            end.defaultCompleteMode = ToilCompleteMode.Instant;
+            yield return end;
         }
     }
 }

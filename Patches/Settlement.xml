@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+    Lets a caravan ask a settlement to send settlers. Patched on the base "Settlement" def, so settlement defs
+    that inherit from it (ParentName="Settlement", e.g. in faction mods) get it too.
+  -->
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/WorldObjectDef[defName="Settlement"]/comps</xpath>
+    <value>
+      <li Class="Recruitment.WorldObjectCompProperties_RecruitmentRequest" />
+    </value>
+  </Operation>
+
+</Patch>

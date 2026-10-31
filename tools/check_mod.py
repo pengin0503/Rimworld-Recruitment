@@ -20,6 +20,9 @@ DYNAMIC_KEYS = {
     "Recruitment_Tab_HowTo_": ["Trader", "Envoy", "CommsConsole"],
 }
 
+# Quoted strings that look like keys but are not translated (e.g. save IDs).
+NOT_KEYS = {"Recruitment_CommTarget"}
+
 errors = []
 
 
@@ -64,6 +67,7 @@ def check_translations():
     # Def names that happen to look like keys are not translation keys.
     def_names = set(all_mod_defs())
     used -= def_names
+    used -= NOT_KEYS
 
     tables = {lang: keyed(lang) for lang in LANGUAGES}
     for lang, table in tables.items():
@@ -125,6 +129,18 @@ def injected(language, def_type, key):
     return False
 
 
+def vanilla_has_child(data_path, tag, def_name, child):
+    for path in Path(data_path).glob("*/Defs/**/*.xml"):
+        try:
+            root = ET.parse(path).getroot()
+        except ET.ParseError:
+            continue
+        for node in root.findall(tag):
+            if node.findtext("defName") == def_name and node.find(child) is not None:
+                return True
+    return False
+
+
 def csharp_types():
     types = set()
     for path in (ROOT / "Source").rglob("*.cs"):
@@ -150,7 +166,9 @@ def check_defs(data_path):
             error(f"def type {tag} is not a class in Source/")
         if tag == "Recruitment.RecruitmentMethodDef":
             job = node.findtext("startJob")
-            if job not in defs or defs[job][0] != "JobDef":
+            if node.findtext("startKind") == "Trader" and job is None:
+                error(f"{name}: trader methods need a startJob")
+            if job is not None and (job not in defs or defs[job][0] != "JobDef"):
                 error(f"{name}: startJob {job} is not a JobDef in Defs/")
             if not node.findall("arrivalModes/li"):
                 error(f"{name}: arrivalModes is empty")
@@ -168,6 +186,37 @@ def check_defs(data_path):
         sound = node.findtext("arriveSound")
         if sound and vanilla is not None and not known(sound):
             error(f"{name}: unknown sound {sound}")
+
+    # Class="Recruitment.X" attributes in defs and patches must name classes in Source/.
+    for path in list((ROOT / "Defs").rglob("*.xml")) + list((ROOT / "Patches").rglob("*.xml")):
+        root = parse(path)
+        if root is None:
+            continue
+        for node in root.iter():
+            cls = node.get("Class")
+            if cls and cls.startswith("Recruitment.") and cls not in types:
+                error(f"{path.relative_to(ROOT)}: Class {cls} is not a class in Source/")
+
+    # Mod textures loaded by path must exist.
+    for path in (ROOT / "Source").rglob("*.cs"):
+        for tex in re.findall(r'ContentFinder<Texture2D>\.Get\("([^"]+)"', path.read_text(encoding="utf-8")):
+            if "Recruitment" in tex and not (ROOT / "Textures" / (tex + ".png")).exists():
+                error(f"{path.relative_to(ROOT)}: texture Textures/{tex}.png does not exist")
+
+    # Patch targets must exist in the game's defs (only checkable with --rimworld-data).
+    if data_path is not None:
+        for path in (ROOT / "Patches").rglob("*.xml"):
+            root = parse(path)
+            if root is None:
+                continue
+            for xpath in root.iter("xpath"):
+                match = re.fullmatch(r'Defs/(\w+)\[defName="(\w+)"\]/(\w+)', (xpath.text or "").strip())
+                if not match:
+                    error(f"{path.relative_to(ROOT)}: cannot verify xpath {xpath.text}")
+                    continue
+                tag, def_name, child = match.groups()
+                if not vanilla_has_child(data_path, tag, def_name, child):
+                    error(f"{path.relative_to(ROOT)}: no vanilla {tag} {def_name} with <{child}> for {xpath.text}")
 
     # DefOf fields must match defs.
     defof = (ROOT / "Source" / "Recruitment" / "RecruitmentDefOf.cs").read_text(encoding="utf-8")
@@ -196,7 +245,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rimworld-data", help="path to the game's Data folder")
     args = parser.parse_args()
-    for path in sorted(ROOT.glob("About/*.xml")):
+    for path in sorted(ROOT.glob("About/*.xml")) + sorted(ROOT.glob("Patches/**/*.xml")):
         parse(path)
     check_defs(args.rimworld_data)
     check_translations()

@@ -12,36 +12,13 @@
   <Recruitment_Reason_Concurrent>this map already has {0} recruitment drive(s) running</Recruitment_Reason_Concurrent>
   <Recruitment_Reason_Silver>not enough silver ({0} needed, {1} available in storage or the home area)</Recruitment_Reason_Silver>
   <Recruitment_Reason_NoFaction>no faction is willing to send applicants</Recruitment_Reason_NoFaction>
-  <Recruitment_Reason_ConsoleUnusable>the comms console cannot be used now</Recruitment_Reason_ConsoleUnusable>
   <Recruitment_Reason_NoDestination>There is no colony the applicants can travel to.</Recruitment_Reason_NoDestination>
   <Recruitment_TraderLeft>{PAWN_labelShort} could not finish asking: the trader left or stopped trading.</Recruitment_TraderLeft>
   <Recruitment_BroadcastInterrupted>{PAWN_labelShort} could not finish the broadcast: the comms console stopped working.</Recruitment_BroadcastInterrupted>
   <Recruitment_Confirm_Title>Start recruitment?</Recruitment_Confirm_Title>
   <Recruitment_Confirm_Text>{0}\n\nCost: {1} silver (not returned if nobody applies)\nDuration: {2}-{3} days\nApplicants: {4}</Recruitment_Confirm_Text>
-  <Recruitment_Confirm_Envoy>{PAWN_labelShort} will be away for the whole drive.</Recruitment_Confirm_Envoy>
-  <Recruitment_Alert_EnvoyAway>Envoys away: {0}</Recruitment_Alert_EnvoyAway>
-  <Recruitment_Alert_EnvoyAwayDesc>These colonists are away recruiting as envoys and will come back with any applicants. Click to open the recruitment tab.</Recruitment_Alert_EnvoyAwayDesc>
-  <Recruitment_Alert_EnvoyWaiting>waiting for a colony to return to</Recruitment_Alert_EnvoyWaiting>
 
   <!-- Envoys -->
-  <Recruitment_EnvoyReason_AlreadyEnvoy>already an envoy</Recruitment_EnvoyReason_AlreadyEnvoy>
-  <Recruitment_EnvoyReason_NotFreeColonist>only free colonists can be envoys</Recruitment_EnvoyReason_NotFreeColonist>
-  <Recruitment_EnvoyReason_NotAdult>children cannot be envoys</Recruitment_EnvoyReason_NotAdult>
-  <Recruitment_EnvoyReason_Incapacitated>cannot travel right now</Recruitment_EnvoyReason_Incapacitated>
-  <Recruitment_EnvoyReason_LastColonist>the colony needs at least one other free colonist</Recruitment_EnvoyReason_LastColonist>
-  <Recruitment_EnvoyReason_NoExit>cannot reach the edge of the map</Recruitment_EnvoyReason_NoExit>
-  <Recruitment_EnvoyDispatched>{PAWN_labelShort} is heading out as an envoy.</Recruitment_EnvoyDispatched>
-  <Recruitment_EnvoyLeft>{PAWN_labelShort} has left as an envoy and should be back in about {1}.</Recruitment_EnvoyLeft>
-  <Recruitment_EnvoyCancelled>{0} stopped before leaving, so the envoy trip was called off. {1} silver was returned.</Recruitment_EnvoyCancelled>
-  <Recruitment_EnvoyStayed>{PAWN_labelShort} stayed behind because nobody else would be left at the colony. {1} silver was returned.</Recruitment_EnvoyStayed>
-  <Recruitment_EnvoyWaiting>{PAWN_labelShort} has finished the envoy trip but there is no colony to return to. {PAWN_pronoun} will wait until there is one.</Recruitment_EnvoyWaiting>
-  <Recruitment_EnvoyReturned>{PAWN_labelShort} has returned from the envoy trip.</Recruitment_EnvoyReturned>
-  <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort} is coming back alone.</Recruitment_EnvoyReturnedAlone>
-  <Recruitment_EnvoyReturnedWith>{PAWN_labelShort} is coming back with them.</Recruitment_EnvoyReturnedWith>
-  <Recruitment_Envoy_Title>Send an envoy</Recruitment_Envoy_Title>
-  <Recruitment_Envoy_Explanation>Costs {0} silver. The envoy walks off the map and is away for the whole drive ({1}-{2} days before the social modifier). Higher social skill shortens the trip and makes it less likely that nobody comes.</Recruitment_Envoy_Explanation>
-  <Recruitment_Envoy_Preview>Social {0}: duration {1}, chance of nobody {2}</Recruitment_Envoy_Preview>
-  <Recruitment_Envoy_Send>Send</Recruitment_Envoy_Send>
 
   <!-- Letters -->
   <Recruitment_FromFaction>from {0}</Recruitment_FromFaction>
@@ -75,8 +52,6 @@
   <Recruitment_Dialog_Healthy>no problems</Recruitment_Dialog_Healthy>
 
   <!-- Main tab -->
-  <Recruitment_Tab_SendEnvoy>Send an envoy...</Recruitment_Tab_SendEnvoy>
-  <Recruitment_Tab_NoMap>no map is selected</Recruitment_Tab_NoMap>
   <Recruitment_Tab_Active>Running drives</Recruitment_Tab_Active>
   <Recruitment_Tab_Waiting>Applicants waiting for a decision</Recruitment_Tab_Waiting>
   <Recruitment_Tab_Methods>Methods</Recruitment_Tab_Methods>
@@ -84,15 +59,13 @@
   <Recruitment_Tab_DriveLine>{0} at {1}, applicants {2}: {3}</Recruitment_Tab_DriveLine>
   <Recruitment_Tab_MapLost>(colony gone, will go elsewhere)</Recruitment_Tab_MapLost>
   <Recruitment_Tab_ArrivesIn>arrival in {0}</Recruitment_Tab_ArrivesIn>
-  <Recruitment_Tab_EnvoyDeparting>{0} is walking out</Recruitment_Tab_EnvoyDeparting>
-  <Recruitment_Tab_Envoy>(envoy: {0})</Recruitment_Tab_Envoy>
   <Recruitment_Tab_GroupLine>{0} applicant(s) from {1}, {2} left</Recruitment_Tab_GroupLine>
   <Recruitment_Tab_Review>Review</Recruitment_Tab_Review>
   <Recruitment_Tab_MethodLine>{0}: {1} silver, {2}-{3} days</Recruitment_Tab_MethodLine>
   <Recruitment_Tab_NeedsResearch>(needs research: {0})</Recruitment_Tab_NeedsResearch>
   <Recruitment_Tab_HowTo_Trader>Select a colonist and right-click a visiting trader.</Recruitment_Tab_HowTo_Trader>
-  <Recruitment_Tab_HowTo_Envoy>Use "Send an envoy" above.</Recruitment_Tab_HowTo_Envoy>
-  <Recruitment_Tab_HowTo_CommsConsole>Select a colonist and right-click a powered comms console.</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_HowTo_Envoy>Form a caravan with silver, then right-click a non-hostile settlement on the world map (or use the button while visiting one).</Recruitment_Tab_HowTo_Envoy>
+  <Recruitment_Tab_HowTo_CommsConsole>Select a colonist, right-click a powered comms console and choose "Broadcast a call for settlers".</Recruitment_Tab_HowTo_CommsConsole>
 
   <!-- Settings -->
   <Recruitment_Settings_General>General</Recruitment_Settings_General>
@@ -115,12 +88,46 @@
   <Recruitment_Settings_MinDays>Minimum days</Recruitment_Settings_MinDays>
   <Recruitment_Settings_MaxDays>Maximum days</Recruitment_Settings_MaxDays>
   <Recruitment_Settings_MinAboveMax>The minimum is above the maximum; the two will be swapped.</Recruitment_Settings_MinAboveMax>
-  <Recruitment_Settings_Envoy>Envoy social skill</Recruitment_Settings_Envoy>
-  <Recruitment_Settings_EnvoyDurationAtZero>Duration at social 0: {0}</Recruitment_Settings_EnvoyDurationAtZero>
-  <Recruitment_Settings_EnvoyDurationPerLevel>Duration reduction per social level: {0}</Recruitment_Settings_EnvoyDurationPerLevel>
+  <Recruitment_Settings_Envoy>Asking at settlements</Recruitment_Settings_Envoy>
   <Recruitment_Settings_EnvoyZeroAtZero>Chance of nobody at social 0: {0}</Recruitment_Settings_EnvoyZeroAtZero>
   <Recruitment_Settings_EnvoyZeroPerLevel>Reduction of that chance per social level: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
-  <Recruitment_Settings_EnvoyPreview>Social 0: duration {0}, nobody {1} / Social 10: {2}, {3} / Social 20: {4}, {5}</Recruitment_Settings_EnvoyPreview>
+  <Recruitment_Settings_EnvoyPreview>Chance of nobody: social 0: {0} / social 10: {1} / social 20: {2}</Recruitment_Settings_EnvoyPreview>
   <Recruitment_Settings_Reset>Reset to defaults</Recruitment_Settings_Reset>
+
+  <Recruitment_Reason_NoNegotiator>nobody in the caravan can negotiate with this faction</Recruitment_Reason_NoNegotiator>
+
+  <Recruitment_Reason_SettlementHostile>the settlement is hostile</Recruitment_Reason_SettlementHostile>
+
+  <Recruitment_Reason_SettlementUnwilling>{0} does not send settlers</Recruitment_Reason_SettlementUnwilling>
+
+  <Recruitment_Reason_Cooldown>this settlement was asked recently; ask again in {0}</Recruitment_Reason_Cooldown>
+
+  <Recruitment_Reason_CaravanSilver>not enough silver in the caravan ({0} needed, {1} carried)</Recruitment_Reason_CaravanSilver>
+
+  <Recruitment_EnvoyRequested>{PAWN_labelShort} asked {1} for settlers. Applicants, if any, are expected at the colony in about {2}.</Recruitment_EnvoyRequested>
+
+  <Recruitment_LegacyEnvoyRecalled>Envoys now travel by caravan. {PAWN_labelShort}, who was away as an envoy from an older version, has been brought back.</Recruitment_LegacyEnvoyRecalled>
+
+  <Recruitment_Comms_CallLabel>Broadcast a call for settlers</Recruitment_Comms_CallLabel>
+
+  <Recruitment_Comms_Info>Call for people willing to join the colony.</Recruitment_Comms_Info>
+
+  <Recruitment_Comms_Intro>{PAWN_labelShort} opens a channel. How should the call for settlers go out?</Recruitment_Comms_Intro>
+
+  <Recruitment_Comms_HangUp>Close the channel</Recruitment_Comms_HangUp>
+
+  <Recruitment_Command_Request>Ask for settlers</Recruitment_Command_Request>
+
+  <Recruitment_Command_RequestDesc>Ask this settlement to send people willing to join the colony.\n\n{0}</Recruitment_Command_RequestDesc>
+
+  <Recruitment_CaravanReport>going to ask {0} for settlers</Recruitment_CaravanReport>
+
+  <Recruitment_DepartureWarning>This caravan is heading for {0}, but it carries {2} silver. Asking there for settlers costs {1} silver, paid from the caravan's goods.\n\nLeave anyway?</Recruitment_DepartureWarning>
+
+  <Recruitment_Alert_ShortOfSilver>Envoy caravan lacks silver</Recruitment_Alert_ShortOfSilver>
+
+  <Recruitment_Alert_ShortOfSilverDesc>These caravans are on their way to ask a settlement for settlers, but no longer carry the {0} silver the request costs.</Recruitment_Alert_ShortOfSilverDesc>
+
+  <Recruitment_Settings_EnvoyCooldown>Days before a settlement can be asked again: {0}</Recruitment_Settings_EnvoyCooldown>
 
 </LanguageData>
