@@ -25,10 +25,9 @@
 
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Envoy</defName>
-    <label>recruit with an envoy</label>
-    <description>Send a colonist out as an envoy. They are away for the whole drive and come back with any applicants. A better social skill makes the trip shorter and more likely to succeed.</description>
+    <label>ask at a settlement</label>
+    <description>Send a caravan to a settlement of a friendly or neutral faction and ask there for settlers. The silver is paid from the caravan's goods on arrival; applicants from that faction then walk to the colony. The caravan's best social skill makes it less likely that nobody comes. Each settlement can only be asked once in a while.</description>
     <startKind>Envoy</startKind>
-    <startJob>Recruitment_DepartAsEnvoy</startJob>
     <baseCost>100</baseCost>
     <baseDays>4~7</baseDays>
     <allowSurface>true</allowSurface>
@@ -36,15 +35,16 @@
     <arrivalModes>
       <li>EdgeWalkIn</li>
     </arrivalModes>
-    <arrivalLabel>walk in from the edge of the map with the envoy</arrivalLabel>
+    <arrivalLabel>walk in from the edge of the map</arrivalLabel>
     <uiOrder>20</uiOrder>
   </Recruitment.RecruitmentMethodDef>
 
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Radio</defName>
     <label>radio broadcast</label>
-    <description>Broadcast a call for settlers from a powered comms console. Applicants walk in. Radio cannot reach the planet from space.</description>
+    <description>Broadcast a call for settlers from a powered comms console ("call for settlers" in its list of contacts). Applicants walk in. Radio cannot reach the planet from space.</description>
     <startKind>CommsConsole</startKind>
+    <!-- Only for saves with the old broadcast job in progress; new drives start from the comms console's contact list. -->
     <startJob>Recruitment_BroadcastRadio</startJob>
     <researchPrerequisites>
       <li>MicroelectronicsBasics</li>
@@ -65,6 +65,7 @@
     <label>orbital comms</label>
     <description>Relay a call for settlers through orbit from a powered comms console. Applicants drop in by transport pod near the colony, and this also works from space.</description>
     <startKind>CommsConsole</startKind>
+    <!-- Only for saves with the old broadcast job in progress. -->
     <startJob>Recruitment_BroadcastOrbital</startJob>
     <researchPrerequisites>
       <li>ShipComputerCore</li>

@@ -7,16 +7,14 @@ using Verse;
 
 namespace Recruitment
 {
-    /// <summary>Overview of running drives and waiting applicants, plus the entry point for sending envoys.</summary>
+    /// <summary>Overview of running drives, waiting applicants and how to start each method.</summary>
     public class MainTabWindow_Recruitment : MainTabWindow
     {
         private Vector2 scrollPosition;
 
         private float viewHeight = 400f;
 
-        // Silver counts, the faction lottery and research lookups do not need to run every frame.
-        private readonly TimedCache<Map, AcceptanceReport> envoyReports = new TimedCache<Map, AcceptanceReport>(RecruitmentUI.CacheSeconds, () => RecruitmentUI.Now);
-
+        // Research lookups and translations do not need to run every frame.
         private readonly TimedCache<int, List<string>> methodLines = new TimedCache<int, List<string>>(RecruitmentUI.CacheSeconds, () => RecruitmentUI.Now);
 
         public override Vector2 RequestedTabSize => new Vector2(760f, 560f);
@@ -32,24 +30,6 @@ namespace Recruitment
             Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
             var listing = new Listing_Standard();
             listing.Begin(viewRect);
-
-            Map current = Find.CurrentMap;
-            AcceptanceReport envoyReport = current == null ? "Recruitment_Tab_NoMap".Translate() : envoyReports.Get(current, () => component.CanStart(RecruitmentDefOf.Recruitment_Envoy, current, needsOriginLottery: true));
-            Rect envoyButton = listing.GetRect(32f);
-            envoyButton.width = 260f;
-            if (envoyReport.Accepted)
-            {
-                if (Widgets.ButtonText(envoyButton, "Recruitment_Tab_SendEnvoy".Translate()))
-                {
-                    Find.WindowStack.Add(new Dialog_SelectEnvoy(current));
-                }
-            }
-            else
-            {
-                Widgets.ButtonText(envoyButton, "Recruitment_Tab_SendEnvoy".Translate(), active: false);
-                TooltipHandler.TipRegion(envoyButton, envoyReport.Reason);
-            }
-            listing.Gap();
 
             Heading(listing, "Recruitment_Tab_Active");
             if (component.Drives.Count == 0)
@@ -91,14 +71,8 @@ namespace Recruitment
         {
             string where = drive.map != null && Find.Maps.Contains(drive.map) ? drive.map.Parent.LabelCap : "Recruitment_Tab_MapLost".Translate().Resolve();
             string origin = drive.origin != null ? drive.origin.Name : "Recruitment_FromNowhere".Translate().Resolve();
-            string timing = drive.state == DriveState.EnvoyDeparting
-                ? "Recruitment_Tab_EnvoyDeparting".Translate(drive.envoy?.LabelShort ?? "?").Resolve()
-                : "Recruitment_Tab_ArrivesIn".Translate(Mathf.Max(0, drive.TicksUntilArrival).ToStringTicksToPeriod()).Resolve();
+            string timing = "Recruitment_Tab_ArrivesIn".Translate(Mathf.Max(0, drive.TicksUntilArrival).ToStringTicksToPeriod()).Resolve();
             string line = "Recruitment_Tab_DriveLine".Translate(drive.method.LabelCap, where, origin, timing);
-            if (drive.envoy != null && drive.state == DriveState.Underway)
-            {
-                line += " " + "Recruitment_Tab_Envoy".Translate(drive.envoy.LabelShort);
-            }
             if (!Prefs.DevMode)
             {
                 listing.Label(line);

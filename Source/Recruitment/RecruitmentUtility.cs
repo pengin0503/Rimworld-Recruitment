@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Recruitment.Logic;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
-using Verse.AI;
 
 namespace Recruitment
 {
@@ -114,11 +114,94 @@ namespace Recruitment
             }
         }
 
+        public static int CountCaravanSilver(Caravan caravan)
+        {
+            int total = 0;
+            List<Thing> items = CaravanInventoryUtility.AllInventoryItems(caravan);
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].def == ThingDefOf.Silver)
+                {
+                    total += items[i].stackCount;
+                }
+            }
+            return total;
+        }
+
+        public static bool TryPayFromCaravan(Caravan caravan, int cost)
+        {
+            if (cost <= 0)
+            {
+                return true;
+            }
+            if (CountCaravanSilver(caravan) < cost)
+            {
+                return false;
+            }
+            int remaining = cost;
+            foreach (Thing taken in CaravanInventoryUtility.TakeThings(caravan, t =>
+            {
+                if (t.def != ThingDefOf.Silver || remaining <= 0)
+                {
+                    return 0;
+                }
+                int amount = System.Math.Min(t.stackCount, remaining);
+                remaining -= amount;
+                return amount;
+            }))
+            {
+                taken.Destroy();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// The warning to show when a caravan leaves for <paramref name="destination"/> without the silver an envoy
+        /// request there would cost, or null when there is nothing to warn about (no destination, the settlement
+        /// cannot be asked, or the caravan carries enough).
+        /// </summary>
+        public static string DepartureWarning(PlanetTile destination, List<TransferableOneWay> transferables)
+        {
+            if (!destination.Valid || transferables == null)
+            {
+                return null;
+            }
+            Settlement settlement = Find.WorldObjects.SettlementAt(destination);
+            GameComponent_Recruitment component = GameComponent_Recruitment.Instance;
+            if (settlement == null || component == null || !component.CanAskSettlement(settlement).Accepted)
+            {
+                return null;
+            }
+            int cost = RecruitmentDefOf.Recruitment_Envoy.Cost;
+            int silver = 0;
+            foreach (TransferableOneWay transferable in transferables)
+            {
+                if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
+                {
+                    continue;
+                }
+                if (transferable.ThingDef == ThingDefOf.Silver)
+                {
+                    silver += transferable.CountToTransfer;
+                }
+                else if (transferable.AnyThing is Pawn pawn && pawn.inventory != null)
+                {
+                    // Silver already in a departing pawn's inventory travels too.
+                    silver += pawn.inventory.innerContainer.TotalStackCountOfDef(ThingDefOf.Silver);
+                }
+            }
+            if (silver >= cost)
+            {
+                return null;
+            }
+            return "Recruitment_DepartureWarning".Translate(settlement.Label, cost, silver);
+        }
+
         // ---- Factions -----------------------------------------------------------------------------------
 
         public static bool IsEligibleOrigin(Faction faction, bool checkPermit)
         {
-            List<RoyalTitlePermitDef> permits = TradePermits(faction);
+            List<RoyalTitlePermitDef> permits = checkPermit ? TradePermits(faction) : NoPermits;
             var traits = new FactionTraits
             {
                 IsPlayer = faction.IsPlayer,
@@ -209,11 +292,10 @@ namespace Recruitment
             return ApplicantRoll.Roll(weights, Rand.Value);
         }
 
-        public static int RollDurationTicks(RecruitmentMethodDef method, int envoySocial)
+        public static int RollDurationTicks(RecruitmentMethodDef method)
         {
             FloatRange days = method.Days;
-            float factor = method.UsesEnvoySocial ? RecruitmentMod.Settings.EnvoyCurve.DurationFactor(envoySocial) : 1f;
-            return RecruitmentDuration.RollTicks(days.min, days.max, factor, Rand.Value);
+            return RecruitmentDuration.RollTicks(days.min, days.max, 1f, Rand.Value);
         }
 
         /// <summary>
@@ -346,38 +428,7 @@ namespace Recruitment
 
         public static int SocialLevel(Pawn pawn)
         {
-            return pawn.skills?.GetSkill(SkillDefOf.Social)?.Level ?? 0;
-        }
-
-        /// <summary>Whether <paramref name="pawn"/> can be sent as an envoy right now.</summary>
-        public static AcceptanceReport CanBeEnvoy(Pawn pawn)
-        {
-            if (!pawn.Spawned || !pawn.IsFreeNonSlaveColonist || pawn.IsQuestLodger())
-            {
-                return "Recruitment_EnvoyReason_NotFreeColonist".Translate();
-            }
-            if (!pawn.DevelopmentalStage.Adult())
-            {
-                return "Recruitment_EnvoyReason_NotAdult".Translate();
-            }
-            if (pawn.Downed || pawn.InMentalState)
-            {
-                return "Recruitment_EnvoyReason_Incapacitated".Translate();
-            }
-            if (pawn.skills == null || pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
-            {
-                return "IncapableOfCapacity".Translate(SkillDefOf.Social.label, pawn.Named("PAWN"));
-            }
-            if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
-            {
-                return "IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, pawn.Named("PAWN"));
-            }
-            // A cached region check; the actual exit cell is only searched for when the envoy is sent.
-            if (!pawn.Map.reachability.CanReachMapEdge(pawn.Position, TraverseParms.For(pawn)))
-            {
-                return "Recruitment_EnvoyReason_NoExit".Translate();
-            }
-            return AcceptanceReport.WasAccepted;
+            return pawn?.skills?.GetSkill(SkillDefOf.Social)?.Level ?? 0;
         }
     }
 }

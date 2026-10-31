@@ -4,15 +4,12 @@ using Recruitment.Logic;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
-using Verse.AI;
-using Verse.AI.Group;
 
 namespace Recruitment
 {
     /// <summary>
-    /// Owns all recruitment state: running drives, applicants waiting for a decision, and envoys who are away.
-    /// Away envoys and waiting applicants are held here rather than as world pawns, because a free player
-    /// pawn passed to the world is reassigned to another faction by <see cref="Pawn.Notify_PassedToWorld"/>.
+    /// Owns all recruitment state: running drives, applicants waiting for a decision and settlement cooldowns.
+    /// Waiting applicants are held here (not spawned, not world pawns) until the player decides on them.
     /// </summary>
     public class GameComponent_Recruitment : GameComponent, IThingHolder
     {
@@ -24,6 +21,11 @@ namespace Recruitment
 
         private ThingOwner<Pawn> heldPawns;
 
+        /// <summary>Settlement ID to the tick an envoy last asked there.</summary>
+        private Dictionary<int, int> settlementRequests = new Dictionary<int, int>();
+
+        private RecruitmentCommTarget commTarget = new RecruitmentCommTarget();
+
         private int nextId = 1;
 
         /// <summary>
@@ -31,6 +33,9 @@ namespace Recruitment
         /// placed), so the orphan scan only runs when it can find something.
         /// </summary>
         private bool orphanCheckPending = true;
+
+        /// <summary>Older saves may contain envoys from before envoys travelled by caravan; they are settled once after loading.</summary>
+        private bool legacyCheckPending = true;
 
         public GameComponent_Recruitment(Game game)
         {
@@ -42,6 +47,9 @@ namespace Recruitment
         public IReadOnlyList<RecruitmentDrive> Drives => drives;
 
         public IReadOnlyList<ApplicantGroup> Groups => groups;
+
+        /// <summary>The comms console target that opens the recruitment broadcast dialog.</summary>
+        public RecruitmentCommTarget CommTarget => commTarget;
 
         public IThingHolder ParentHolder => null;
 
@@ -60,17 +68,12 @@ namespace Recruitment
             return drives.Count(d => d.map == map);
         }
 
-        public bool IsEnvoy(Pawn pawn)
-        {
-            return drives.Any(d => d.envoy == pawn);
-        }
-
         public ApplicantGroup GroupById(int id)
         {
             return groups.FirstOrDefault(g => g.id == id);
         }
 
-        // ---- Starting ---------------------------------------------------------------------------------
+        // ---- Starting from the colony -----------------------------------------------------------------
 
         /// <summary>Checks everything about starting <paramref name="method"/> on <paramref name="map"/> except who starts it.</summary>
         public AcceptanceReport CanStart(RecruitmentMethodDef method, Map map, bool needsOriginLottery)
@@ -79,6 +82,26 @@ namespace Recruitment
             {
                 return false;
             }
+            AcceptanceReport common = CanStartCommon(method, map);
+            if (!common.Accepted)
+            {
+                return common;
+            }
+            int silver = RecruitmentUtility.CountSpendableSilver(map);
+            if (silver < method.Cost)
+            {
+                return "Recruitment_Reason_Silver".Translate(method.Cost, silver);
+            }
+            if (needsOriginLottery && !RecruitmentUtility.AnyEligibleOrigin(checkPermit: true))
+            {
+                return "Recruitment_Reason_NoFaction".Translate();
+            }
+            return true;
+        }
+
+        /// <summary>Research, surface/space and the per-map limit, shared by every method.</summary>
+        private AcceptanceReport CanStartCommon(RecruitmentMethodDef method, Map map)
+        {
             if (!method.ResearchFinished)
             {
                 return "Recruitment_Reason_Research".Translate(method.MissingResearch.Select(r => r.LabelCap.Resolve()).ToCommaList());
@@ -91,15 +114,6 @@ namespace Recruitment
             if (ActiveDrivesOn(map) >= max)
             {
                 return "Recruitment_Reason_Concurrent".Translate(max);
-            }
-            int silver = RecruitmentUtility.CountSpendableSilver(map);
-            if (silver < method.Cost)
-            {
-                return "Recruitment_Reason_Silver".Translate(method.Cost, silver);
-            }
-            if (needsOriginLottery && !RecruitmentUtility.AnyEligibleOrigin(checkPermit: true))
-            {
-                return "Recruitment_Reason_NoFaction".Translate();
             }
             return true;
         }
@@ -120,6 +134,13 @@ namespace Recruitment
                 RejectMessage("Recruitment_Reason_Silver".Translate(cost, RecruitmentUtility.CountSpendableSilver(map)), starter);
                 return false;
             }
+            RecruitmentDrive drive = AddDrive(method, map, origin, cost, social: 0);
+            Messages.Message("Recruitment_Started".Translate(method.LabelCap, drive.durationTicks.ToStringTicksToPeriod()), starter, MessageTypeDefOf.TaskCompletion, historical: false);
+            return true;
+        }
+
+        private RecruitmentDrive AddDrive(RecruitmentMethodDef method, Map map, Faction origin, int paid, int social)
+        {
             int now = Find.TickManager.TicksGame;
             var drive = new RecruitmentDrive
             {
@@ -128,134 +149,122 @@ namespace Recruitment
                 state = DriveState.Underway,
                 map = map,
                 origin = origin,
-                applicantCount = RecruitmentUtility.RollApplicantCount(method, 0),
-                paidSilver = cost,
+                applicantCount = RecruitmentUtility.RollApplicantCount(method, social),
+                paidSilver = paid,
                 startTick = now,
-                durationTicks = RecruitmentUtility.RollDurationTicks(method, 0),
+                durationTicks = RecruitmentUtility.RollDurationTicks(method),
             };
             drive.arrivalTick = now + drive.durationTicks;
             drives.Add(drive);
-            Messages.Message("Recruitment_Started".Translate(method.LabelCap, drive.durationTicks.ToStringTicksToPeriod()), starter, MessageTypeDefOf.TaskCompletion, historical: false);
-            return true;
+            return drive;
         }
 
-        public AcceptanceReport CanDispatchEnvoy(Pawn pawn)
+        // ---- Envoys (caravans visiting settlements) ---------------------------------------------------
+
+        public int CooldownTicksRemaining(Settlement settlement)
         {
-            if (IsEnvoy(pawn))
-            {
-                return "Recruitment_EnvoyReason_AlreadyEnvoy".Translate();
-            }
-            AcceptanceReport report = RecruitmentUtility.CanBeEnvoy(pawn);
-            if (!report.Accepted)
-            {
-                return report;
-            }
-            if (!AnyColonistStaysBehind(pawn))
-            {
-                return "Recruitment_EnvoyReason_LastColonist".Translate();
-            }
-            return CanStart(RecruitmentDefOf.Recruitment_Envoy, pawn.Map, needsOriginLottery: true);
+            int? last = settlementRequests.TryGetValue(settlement.ID, out int tick) ? tick : (int?)null;
+            return CooldownRule.TicksRemaining(last, Find.TickManager.TicksGame, RecruitmentMod.Settings.EnvoyCooldownTicks);
         }
 
         /// <summary>
-        /// Whether some free colonist other than <paramref name="envoy"/> stays on a map. Colonists already
-        /// walking out as envoys do not count, or two envoys sent together could leave nobody behind.
+        /// Whether <paramref name="caravan"/> can ask <paramref name="settlement"/> to send settlers. With
+        /// <paramref name="checkSilver"/> false the caravan's silver is ignored (used for the departure warning).
         /// </summary>
-        private bool AnyColonistStaysBehind(Pawn envoy)
+        public AcceptanceReport CanRequestAt(Caravan caravan, Settlement settlement, bool checkSilver)
         {
-            return PawnsFinder.AllMaps_FreeColonistsSpawned.Any(p => p != envoy && !IsEnvoy(p));
-        }
-
-        public bool TryDispatchEnvoy(Pawn pawn)
-        {
-            AcceptanceReport report = CanDispatchEnvoy(pawn);
-            if (!report.Accepted || !RCellFinder.TryFindBestExitSpot(pawn, out IntVec3 exit))
-            {
-                RejectMessage(report.Accepted ? "Recruitment_EnvoyReason_NoExit".Translate() : report, pawn);
-                return false;
-            }
             RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Envoy;
-            Map map = pawn.Map;
-            int cost = method.Cost;
-            if (!RecruitmentUtility.TryPay(map, cost))
+            AcceptanceReport target = CanAskSettlement(settlement);
+            if (!target.Accepted)
             {
-                RejectMessage("Recruitment_Reason_Silver".Translate(cost, RecruitmentUtility.CountSpendableSilver(map)), pawn);
-                return false;
+                return target;
             }
-            int social = RecruitmentUtility.SocialLevel(pawn);
-            var drive = new RecruitmentDrive
+            Faction faction = settlement.Faction;
+            if (caravan != null)
             {
-                id = nextId++,
-                method = method,
-                state = DriveState.EnvoyDeparting,
-                map = map,
-                origin = RecruitmentUtility.EligibleOrigins(checkPermit: true).RandomElement(),
-                applicantCount = RecruitmentUtility.RollApplicantCount(method, social),
-                paidSilver = cost,
-                startTick = Find.TickManager.TicksGame,
-                durationTicks = RecruitmentUtility.RollDurationTicks(method, social),
-                envoy = pawn,
-            };
-            drives.Add(drive);
-            if (pawn.Drafted)
-            {
-                pawn.drafter.Drafted = false;
+                Pawn negotiator = BestCaravanPawnUtility.FindBestNegotiator(caravan, faction, settlement.TraderKind);
+                if (negotiator == null)
+                {
+                    // FindBestNegotiator only returns pawns who may deal with this faction (e.g. have the Empire's title).
+                    Pawn anyone = BestCaravanPawnUtility.FindBestNegotiator(caravan);
+                    if (anyone == null || anyone.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
+                    {
+                        return "Recruitment_Reason_NoNegotiator".Translate();
+                    }
+                    AcceptanceReport canTrade = anyone.CanTradeWith(faction, settlement.TraderKind);
+                    return canTrade.Reason.NullOrEmpty() ? "Recruitment_Reason_NoNegotiator".Translate().Resolve() : canTrade.Reason;
+                }
             }
-            Job job = JobMaker.MakeJob(method.startJob, exit);
-            job.playerForced = true;
-            pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-            Messages.Message("Recruitment_EnvoyDispatched".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.TaskCompletion, historical: false);
+            Map destination = RecruitmentUtility.ResolveDestination(method, null);
+            if (destination == null)
+            {
+                return "Recruitment_Reason_NoDestination".Translate();
+            }
+            AcceptanceReport common = CanStartCommon(method, destination);
+            if (!common.Accepted)
+            {
+                return common;
+            }
+            if (checkSilver && caravan != null)
+            {
+                int silver = RecruitmentUtility.CountCaravanSilver(caravan);
+                if (silver < method.Cost)
+                {
+                    return "Recruitment_Reason_CaravanSilver".Translate(method.Cost, silver);
+                }
+            }
             return true;
         }
 
-        /// <summary>Called by the envoy's job when they reach the map edge.</summary>
-        public void Notify_EnvoyReachedExit(Pawn pawn)
+        /// <summary>The settlement-side conditions: a willing, non-hostile faction and no recent request.</summary>
+        public AcceptanceReport CanAskSettlement(Settlement settlement)
         {
-            RecruitmentDrive drive = drives.FirstOrDefault(d => d.envoy == pawn && d.state == DriveState.EnvoyDeparting);
-            if (drive == null)
+            if (settlement == null || !settlement.Spawned || settlement.HasMap || settlement.Tile.LayerDef.isSpace)
             {
-                return;
-            }
-            // The others may have died or left while the envoy was walking out.
-            if (!AnyColonistStaysBehind(pawn))
-            {
-                drives.Remove(drive);
-                RecruitmentUtility.Refund(pawn.Map, pawn.Position, drive.paidSilver);
-                Messages.Message("Recruitment_EnvoyStayed".Translate(pawn.Named("PAWN"), drive.paidSilver), pawn, MessageTypeDefOf.NegativeEvent, historical: false);
-                return;
-            }
-            if (Depart(drive))
-            {
-                Messages.Message("Recruitment_EnvoyLeft".Translate(pawn.Named("PAWN"), drive.durationTicks.ToStringTicksToPeriod()), MessageTypeDefOf.NeutralEvent, historical: false);
-            }
-        }
-
-        /// <summary>Takes the envoy off the map and starts the trip. Returns false if the trip had to be called off.</summary>
-        private bool Depart(RecruitmentDrive drive)
-        {
-            Pawn pawn = drive.envoy;
-            pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ExitedMap);
-            if (pawn.carryTracker?.CarriedThing != null)
-            {
-                pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out Thing _);
-            }
-            Map map = pawn.Map;
-            IntVec3 position = pawn.Position;
-            pawn.DeSpawnOrDeselect();
-            if (!heldPawns.TryAdd(pawn))
-            {
-                // Never leave the envoy nowhere: put them back and call the trip off.
-                Log.Error($"[Recruitment] Could not hold envoy {pawn}; cancelling the trip.");
-                GenSpawn.Spawn(pawn, position, map);
-                drives.Remove(drive);
-                RecruitmentUtility.Refund(map, position, drive.paidSilver);
                 return false;
             }
-            int now = Find.TickManager.TicksGame;
-            drive.state = DriveState.Underway;
-            drive.startTick = now;
-            drive.arrivalTick = now + drive.durationTicks;
-            drive.lastAgedTick = now;
+            Faction faction = settlement.Faction;
+            if (faction == null || faction.IsPlayer || faction.HostileTo(Faction.OfPlayer))
+            {
+                return "Recruitment_Reason_SettlementHostile".Translate();
+            }
+            // Permits depend on the negotiator, so they are checked against the caravan, not here.
+            if (!RecruitmentUtility.IsEligibleOrigin(faction, checkPermit: false))
+            {
+                return "Recruitment_Reason_SettlementUnwilling".Translate(faction.Name);
+            }
+            int cooldown = CooldownTicksRemaining(settlement);
+            if (cooldown > 0)
+            {
+                return "Recruitment_Reason_Cooldown".Translate(cooldown.ToStringTicksToPeriod());
+            }
+            return true;
+        }
+
+        /// <summary>Called when an envoy caravan arrives at (or is already visiting) a settlement and asks for settlers.</summary>
+        public bool TryRequestAt(Caravan caravan, Settlement settlement)
+        {
+            AcceptanceReport report = CanRequestAt(caravan, settlement, checkSilver: true);
+            if (!report.Accepted)
+            {
+                if (!report.Reason.NullOrEmpty())
+                {
+                    Messages.Message(report.Reason, caravan, MessageTypeDefOf.RejectInput, historical: false);
+                }
+                return false;
+            }
+            RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Envoy;
+            int cost = method.Cost;
+            if (!RecruitmentUtility.TryPayFromCaravan(caravan, cost))
+            {
+                Messages.Message("Recruitment_Reason_CaravanSilver".Translate(cost, RecruitmentUtility.CountCaravanSilver(caravan)), caravan, MessageTypeDefOf.RejectInput, historical: false);
+                return false;
+            }
+            Pawn negotiator = BestCaravanPawnUtility.FindBestNegotiator(caravan, settlement.Faction, settlement.TraderKind);
+            Map destination = RecruitmentUtility.ResolveDestination(method, null);
+            RecruitmentDrive drive = AddDrive(method, destination, settlement.Faction, cost, RecruitmentUtility.SocialLevel(negotiator));
+            settlementRequests[settlement.ID] = Find.TickManager.TicksGame;
+            Messages.Message("Recruitment_EnvoyRequested".Translate(negotiator.Named("PAWN"), settlement.Label, drive.durationTicks.ToStringTicksToPeriod()), caravan, MessageTypeDefOf.TaskCompletion, historical: false);
             return true;
         }
 
@@ -276,24 +285,17 @@ namespace Recruitment
             {
                 return;
             }
-            // Backwards by index: Arrive and CheckDepartingEnvoy may remove the current drive, and this avoids
-            // copying the list every check.
+            if (legacyCheckPending)
+            {
+                legacyCheckPending = false;
+                SettleLegacyEnvoys();
+            }
+            // Backwards by index: Arrive may remove the current drive, and this avoids copying the list.
             for (int i = drives.Count - 1; i >= 0; i--)
             {
-                if (i >= drives.Count)
+                if (i < drives.Count && now >= drives[i].arrivalTick)
                 {
-                    continue;
-                }
-                RecruitmentDrive drive = drives[i];
-                if (drive.state == DriveState.EnvoyDeparting)
-                {
-                    CheckDepartingEnvoy(drive);
-                    continue;
-                }
-                AgeAwayEnvoy(drive, now);
-                if (now >= drive.arrivalTick)
-                {
-                    Arrive(drive);
+                    Arrive(drives[i]);
                 }
             }
             if (orphanCheckPending)
@@ -303,56 +305,40 @@ namespace Recruitment
             }
         }
 
-        /// <summary>Whether the envoy is still on their way out: doing the departure job, or about to (queued behind another job).</summary>
-        private static bool IsWalkingOut(Pawn pawn, JobDef departJob)
+        /// <summary>
+        /// Before envoys travelled by caravan they walked off the map and were held by this component. Such envoys
+        /// in an old save are brought home (the orphan scan does that) and a trip that had not left yet is refunded;
+        /// the applicants of a trip already underway still come.
+        /// </summary>
+        private void SettleLegacyEnvoys()
         {
-            if (pawn.CurJobDef == departJob)
+            for (int i = drives.Count - 1; i >= 0; i--)
             {
-                return true;
-            }
-            foreach (QueuedJob queued in pawn.jobs.jobQueue)
-            {
-                if (queued.job?.def == departJob)
+                RecruitmentDrive drive = drives[i];
+                if (drive.envoy == null)
                 {
-                    return true;
+                    continue;
                 }
+                Pawn envoy = drive.envoy;
+                drive.envoy = null;
+                if (drive.state == DriveState.EnvoyDeparting)
+                {
+                    drives.RemoveAt(i);
+                    bool onMap = envoy.Spawned;
+                    RecruitmentUtility.Refund(onMap ? envoy.Map : drive.map, onMap ? envoy.Position : IntVec3.Invalid, drive.paidSilver);
+                    if (onMap && envoy.CurJobDef == RecruitmentDefOf.Recruitment_DepartAsEnvoy)
+                    {
+                        envoy.jobs.EndCurrentJob(Verse.AI.JobCondition.InterruptForced);
+                    }
+                }
+                orphanCheckPending = true;
+                Messages.Message("Recruitment_LegacyEnvoyRecalled".Translate(envoy.Named("PAWN")), MessageTypeDefOf.NeutralEvent, historical: false);
             }
-            return false;
-        }
-
-        /// <summary>Cancels and refunds an envoy drive whose envoy stopped walking out before leaving.</summary>
-        private void CheckDepartingEnvoy(RecruitmentDrive drive)
-        {
-            Pawn pawn = drive.envoy;
-            if (pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.Spawned && IsWalkingOut(pawn, drive.method.startJob))
-            {
-                return;
-            }
-            drives.Remove(drive);
-            bool onMap = pawn != null && pawn.Spawned;
-            RecruitmentUtility.Refund(onMap ? pawn.Map : drive.map, onMap ? pawn.Position : IntVec3.Invalid, drive.paidSilver);
-            Messages.Message("Recruitment_EnvoyCancelled".Translate(pawn?.LabelShort ?? "?", drive.paidSilver), onMap ? pawn : LookTargets.Invalid, MessageTypeDefOf.NegativeEvent, historical: false);
-        }
-
-        /// <summary>Ages an away envoy the way the game ages idle world pawns, in whole mothball intervals.</summary>
-        private void AgeAwayEnvoy(RecruitmentDrive drive, int now)
-        {
-            Pawn envoy = drive.envoy;
-            if (envoy == null || !heldPawns.Contains(envoy))
-            {
-                return;
-            }
-            int due = MothballSchedule.DueTicks(drive.lastAgedTick, now, MothballSchedule.Interval);
-            for (int ticks = 0; ticks < due; ticks += MothballSchedule.Interval)
-            {
-                envoy.TickMothballed(MothballSchedule.Interval);
-            }
-            drive.lastAgedTick += due;
         }
 
         /// <summary>
-        /// Held pawns that no drive or group refers to any more (e.g. after a def went missing on load, or after
-        /// an arrival that failed) would otherwise be lost: colonists are brought home, others are discarded.
+        /// Held pawns that no group refers to any more (e.g. after a def went missing on load, an arrival that
+        /// failed, or an envoy from an old save) would otherwise be lost: colonists are brought home, others discarded.
         /// </summary>
         private void RecoverOrphans()
         {
@@ -361,13 +347,6 @@ namespace Recruitment
                 return;
             }
             var referenced = new HashSet<Pawn>();
-            foreach (RecruitmentDrive drive in drives)
-            {
-                if (drive.envoy != null)
-                {
-                    referenced.Add(drive.envoy);
-                }
-            }
             foreach (ApplicantGroup group in groups)
             {
                 referenced.UnionWith(group.pawns);
@@ -452,15 +431,9 @@ namespace Recruitment
             Map dest = RecruitmentUtility.ResolveDestination(drive.method, drive.map);
             if (dest == null)
             {
-                // A gravship in flight has no map yet, and an envoy needs a home to come back to: both wait.
-                bool gravshipInFlight = Find.CurrentGravship != null;
-                if (drive.envoy != null || gravshipInFlight)
+                // A gravship in flight has no map yet: wait for it to land rather than failing.
+                if (Find.CurrentGravship != null)
                 {
-                    if (drive.envoy != null && !drive.envoyWaitingNotified && !gravshipInFlight)
-                    {
-                        drive.envoyWaitingNotified = true;
-                        Messages.Message("Recruitment_EnvoyWaiting".Translate(drive.envoy.Named("PAWN")), MessageTypeDefOf.NeutralEvent);
-                    }
                     return;
                 }
                 drives.Remove(drive);
@@ -469,19 +442,11 @@ namespace Recruitment
             }
             drives.Remove(drive);
 
-            var returning = new List<Pawn>();
-            if (drive.envoy != null && heldPawns.Contains(drive.envoy))
-            {
-                heldPawns.Remove(drive.envoy);
-                drive.envoy.TickMothballed(MothballSchedule.RemainderTicks(drive.lastAgedTick, Find.TickManager.TicksGame));
-                returning.Add(drive.envoy);
-            }
-
             Faction origin = drive.applicantCount > 0 ? ValidOrigin(drive) : null;
             var applicants = new List<Pawn>();
             for (int i = 0; i < drive.applicantCount; i++)
             {
-                // Generation failures are logged and skipped, so the envoy still comes home below.
+                // Generation failures are logged and skipped.
                 Pawn pawn = RecruitmentUtility.TryGenerateApplicant(origin, dest);
                 if (pawn == null)
                 {
@@ -496,13 +461,7 @@ namespace Recruitment
 
             if (applicants.Count == 0)
             {
-                BringHome(returning, dest, drive.method);
-                TaggedString text = "Recruitment_LetterNoApplicants".Translate(drive.method.label);
-                if (returning.Count > 0)
-                {
-                    text += "\n\n" + "Recruitment_EnvoyReturnedAlone".Translate(returning[0].Named("PAWN"));
-                }
-                Find.LetterStack.ReceiveLetter("Recruitment_LetterFailedLabel".Translate(), text, LetterDefOf.NegativeEvent, new LookTargets(returning));
+                Find.LetterStack.ReceiveLetter("Recruitment_LetterFailedLabel".Translate(), "Recruitment_LetterNoApplicants".Translate(drive.method.label), LetterDefOf.NegativeEvent);
                 return;
             }
 
@@ -512,16 +471,11 @@ namespace Recruitment
                 {
                     pawn.SetFaction(Faction.OfPlayer);
                 }
-                BringHome(returning.Concat(applicants).ToList(), dest, drive.method);
-                SendJoinedLetter(applicants, drive.method, returning.FirstOrDefault());
+                BringHome(applicants, dest, drive.method);
+                SendJoinedLetter(applicants, drive.method);
                 return;
             }
 
-            if (returning.Count > 0)
-            {
-                BringHome(returning, dest, drive.method);
-                Messages.Message("Recruitment_EnvoyReturned".Translate(returning[0].Named("PAWN")), returning[0], MessageTypeDefOf.PositiveEvent);
-            }
             foreach (Pawn pawn in applicants)
             {
                 heldPawns.TryAdd(pawn);
@@ -593,7 +547,7 @@ namespace Recruitment
             if (joining.Count > 0)
             {
                 BringHome(joining, dest, group.method);
-                SendJoinedLetter(joining, group.method, null);
+                SendJoinedLetter(joining, group.method);
             }
 
             List<Pawn> leaving = group.pawns.Where(p => !joining.Contains(p) && !p.Destroyed).ToList();
@@ -609,13 +563,9 @@ namespace Recruitment
             return true;
         }
 
-        private static void SendJoinedLetter(List<Pawn> joined, RecruitmentMethodDef method, Pawn returningEnvoy)
+        private static void SendJoinedLetter(List<Pawn> joined, RecruitmentMethodDef method)
         {
             TaggedString text = "Recruitment_LetterJoined".Translate(method.label, joined.Select(p => p.NameFullColored.Resolve()).ToLineList("  - "));
-            if (returningEnvoy != null)
-            {
-                text += "\n\n" + "Recruitment_EnvoyReturnedWith".Translate(returningEnvoy.Named("PAWN"));
-            }
             Find.LetterStack.ReceiveLetter("Recruitment_LetterJoinedLabel".Translate(joined.Count), text, LetterDefOf.PositiveEvent, new LookTargets(joined));
         }
 
@@ -623,13 +573,6 @@ namespace Recruitment
 
         public void DevArriveNow(RecruitmentDrive drive)
         {
-            if (drive.state == DriveState.EnvoyDeparting)
-            {
-                if (drive.envoy == null || !drive.envoy.Spawned || !Depart(drive))
-                {
-                    return;
-                }
-            }
             Arrive(drive);
         }
 
@@ -641,12 +584,17 @@ namespace Recruitment
             Scribe_Deep.Look(ref heldPawns, "heldPawns", this);
             Scribe_Collections.Look(ref drives, "drives", LookMode.Deep);
             Scribe_Collections.Look(ref groups, "groups", LookMode.Deep);
+            Scribe_Collections.Look(ref settlementRequests, "settlementRequests", LookMode.Value, LookMode.Value);
+            // Deep-saved so that comms console jobs, which save their target by reference, can find it on load.
+            Scribe_Deep.Look(ref commTarget, "commTarget");
             Scribe_Values.Look(ref nextId, "nextId", 1);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 heldPawns ??= new ThingOwner<Pawn>(this, oneStackOnly: false, LookMode.Deep);
                 drives ??= new List<RecruitmentDrive>();
                 groups ??= new List<ApplicantGroup>();
+                settlementRequests ??= new Dictionary<int, int>();
+                commTarget ??= new RecruitmentCommTarget();
                 drives.RemoveAll(d => d?.method == null);
                 groups.RemoveAll(g => g?.method == null);
             }

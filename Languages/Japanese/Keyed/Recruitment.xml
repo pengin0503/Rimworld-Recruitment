@@ -12,36 +12,13 @@
   <Recruitment_Reason_Concurrent>このマップではすでに{0}件の募集が進行中です</Recruitment_Reason_Concurrent>
   <Recruitment_Reason_Silver>シルバーが足りません（必要 {0}、倉庫・居住エリア内に {1}）</Recruitment_Reason_Silver>
   <Recruitment_Reason_NoFaction>応募者を送ってくれる派閥がありません</Recruitment_Reason_NoFaction>
-  <Recruitment_Reason_ConsoleUnusable>通信機は今は使えません</Recruitment_Reason_ConsoleUnusable>
   <Recruitment_Reason_NoDestination>応募者が向かえる拠点がありません。</Recruitment_Reason_NoDestination>
   <Recruitment_TraderLeft>商人が立ち去ったか交易をやめたため、{PAWN_labelShort}は募集を頼めませんでした。</Recruitment_TraderLeft>
   <Recruitment_BroadcastInterrupted>通信機が使えなくなったため、{PAWN_labelShort}は放送を終えられませんでした。</Recruitment_BroadcastInterrupted>
   <Recruitment_Confirm_Title>募集を開始しますか？</Recruitment_Confirm_Title>
   <Recruitment_Confirm_Text>{0}\n\n費用: {1}シルバー（応募者が0人でも返却されません）\n期間: {2}〜{3}日\n到着: {4}</Recruitment_Confirm_Text>
-  <Recruitment_Confirm_Envoy>{PAWN_labelShort}は募集が終わるまで不在になります。</Recruitment_Confirm_Envoy>
-  <Recruitment_Alert_EnvoyAway>不在の使者: {0}人</Recruitment_Alert_EnvoyAway>
-  <Recruitment_Alert_EnvoyAwayDesc>次の入植者は使者として募集に出ており、応募者がいれば一緒に戻ってきます。クリックすると募集タブを開きます。</Recruitment_Alert_EnvoyAwayDesc>
-  <Recruitment_Alert_EnvoyWaiting>帰る拠点ができるのを待っています</Recruitment_Alert_EnvoyWaiting>
 
   <!-- 使者 -->
-  <Recruitment_EnvoyReason_AlreadyEnvoy>すでに使者です</Recruitment_EnvoyReason_AlreadyEnvoy>
-  <Recruitment_EnvoyReason_NotFreeColonist>使者になれるのは自由な入植者だけです</Recruitment_EnvoyReason_NotFreeColonist>
-  <Recruitment_EnvoyReason_NotAdult>子供は使者になれません</Recruitment_EnvoyReason_NotAdult>
-  <Recruitment_EnvoyReason_Incapacitated>今は出発できる状態ではありません</Recruitment_EnvoyReason_Incapacitated>
-  <Recruitment_EnvoyReason_LastColonist>ほかに自由な入植者が1人以上必要です</Recruitment_EnvoyReason_LastColonist>
-  <Recruitment_EnvoyReason_NoExit>マップの端まで行けません</Recruitment_EnvoyReason_NoExit>
-  <Recruitment_EnvoyDispatched>{PAWN_labelShort}が使者として出発します。</Recruitment_EnvoyDispatched>
-  <Recruitment_EnvoyLeft>{PAWN_labelShort}が使者として旅立ちました。およそ{1}後に戻ります。</Recruitment_EnvoyLeft>
-  <Recruitment_EnvoyCancelled>{0}が出発前に止まったため、使者の派遣を取りやめました。{1}シルバーを返却しました。</Recruitment_EnvoyCancelled>
-  <Recruitment_EnvoyStayed>ほかに拠点に残る入植者がいなくなるため、{PAWN_labelShort}は出発を取りやめました。{1}シルバーを返却しました。</Recruitment_EnvoyStayed>
-  <Recruitment_EnvoyWaiting>{PAWN_labelShort}は使者の務めを終えましたが、帰る拠点がありません。拠点ができるまで待機します。</Recruitment_EnvoyWaiting>
-  <Recruitment_EnvoyReturned>{PAWN_labelShort}が使者の旅から戻りました。</Recruitment_EnvoyReturned>
-  <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort}は1人で戻ってきます。</Recruitment_EnvoyReturnedAlone>
-  <Recruitment_EnvoyReturnedWith>{PAWN_labelShort}も一緒に戻ってきます。</Recruitment_EnvoyReturnedWith>
-  <Recruitment_Envoy_Title>使者を派遣する</Recruitment_Envoy_Title>
-  <Recruitment_Envoy_Explanation>費用は{0}シルバーです。使者はマップの端から出発し、募集が終わるまで不在になります（社交補正前で{1}〜{2}日）。社交スキルが高いほど、期間が短く、応募者0人になりにくくなります。</Recruitment_Envoy_Explanation>
-  <Recruitment_Envoy_Preview>社交{0}: 期間 {1}、0人の確率 {2}</Recruitment_Envoy_Preview>
-  <Recruitment_Envoy_Send>派遣する</Recruitment_Envoy_Send>
 
   <!-- レター -->
   <Recruitment_FromFaction>{0}出身</Recruitment_FromFaction>
@@ -75,8 +52,6 @@
   <Recruitment_Dialog_Healthy>問題なし</Recruitment_Dialog_Healthy>
 
   <!-- メインタブ -->
-  <Recruitment_Tab_SendEnvoy>使者を派遣する…</Recruitment_Tab_SendEnvoy>
-  <Recruitment_Tab_NoMap>マップが選択されていません</Recruitment_Tab_NoMap>
   <Recruitment_Tab_Active>進行中の募集</Recruitment_Tab_Active>
   <Recruitment_Tab_Waiting>判断待ちの応募者</Recruitment_Tab_Waiting>
   <Recruitment_Tab_Methods>募集方式</Recruitment_Tab_Methods>
@@ -84,15 +59,13 @@
   <Recruitment_Tab_DriveLine>{0}（{1}、応募者は{2}）: {3}</Recruitment_Tab_DriveLine>
   <Recruitment_Tab_MapLost>拠点が失われたため別の拠点へ</Recruitment_Tab_MapLost>
   <Recruitment_Tab_ArrivesIn>到着まで {0}</Recruitment_Tab_ArrivesIn>
-  <Recruitment_Tab_EnvoyDeparting>{0}が出発中</Recruitment_Tab_EnvoyDeparting>
-  <Recruitment_Tab_Envoy>（使者: {0}）</Recruitment_Tab_Envoy>
   <Recruitment_Tab_GroupLine>{1}の応募者{0}人、残り{2}</Recruitment_Tab_GroupLine>
   <Recruitment_Tab_Review>確認する</Recruitment_Tab_Review>
   <Recruitment_Tab_MethodLine>{0}: {1}シルバー、{2}〜{3}日</Recruitment_Tab_MethodLine>
   <Recruitment_Tab_NeedsResearch>（研究が必要: {0}）</Recruitment_Tab_NeedsResearch>
   <Recruitment_Tab_HowTo_Trader>入植者を選択して、来訪中の商人を右クリックします。</Recruitment_Tab_HowTo_Trader>
-  <Recruitment_Tab_HowTo_Envoy>上の「使者を派遣する」から行います。</Recruitment_Tab_HowTo_Envoy>
-  <Recruitment_Tab_HowTo_CommsConsole>入植者を選択して、電力の通った通信機を右クリックします。</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_HowTo_Envoy>シルバーを持たせてキャラバンを編成し、ワールドマップで敵対していない拠点を右クリックします（拠点を訪問中なら、キャラバンのボタンからも依頼できます）。</Recruitment_Tab_HowTo_Envoy>
+  <Recruitment_Tab_HowTo_CommsConsole>入植者を選択して電力の通った通信機を右クリックし、「入植者募集を呼びかける」を選びます。</Recruitment_Tab_HowTo_CommsConsole>
 
   <!-- 設定 -->
   <Recruitment_Settings_General>全般</Recruitment_Settings_General>
@@ -115,12 +88,46 @@
   <Recruitment_Settings_MinDays>最短日数</Recruitment_Settings_MinDays>
   <Recruitment_Settings_MaxDays>最長日数</Recruitment_Settings_MaxDays>
   <Recruitment_Settings_MinAboveMax>最短が最長を上回っています。両者を入れ替えて扱います。</Recruitment_Settings_MinAboveMax>
-  <Recruitment_Settings_Envoy>使者の社交スキル</Recruitment_Settings_Envoy>
-  <Recruitment_Settings_EnvoyDurationAtZero>社交0での期間: {0}</Recruitment_Settings_EnvoyDurationAtZero>
-  <Recruitment_Settings_EnvoyDurationPerLevel>社交1レベルごとの期間短縮: {0}</Recruitment_Settings_EnvoyDurationPerLevel>
+  <Recruitment_Settings_Envoy>拠点での募集依頼</Recruitment_Settings_Envoy>
   <Recruitment_Settings_EnvoyZeroAtZero>社交0での応募者0人の確率: {0}</Recruitment_Settings_EnvoyZeroAtZero>
   <Recruitment_Settings_EnvoyZeroPerLevel>社交1レベルごとのその確率の低下: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
-  <Recruitment_Settings_EnvoyPreview>社交0: 期間 {0}、0人 {1} ／ 社交10: {2}、{3} ／ 社交20: {4}、{5}</Recruitment_Settings_EnvoyPreview>
+  <Recruitment_Settings_EnvoyPreview>応募者0人の確率: 社交0: {0} ／ 社交10: {1} ／ 社交20: {2}</Recruitment_Settings_EnvoyPreview>
   <Recruitment_Settings_Reset>初期設定に戻す</Recruitment_Settings_Reset>
+
+  <Recruitment_Reason_NoNegotiator>キャラバンに、この派閥と交渉できる人がいません</Recruitment_Reason_NoNegotiator>
+
+  <Recruitment_Reason_SettlementHostile>敵対している拠点です</Recruitment_Reason_SettlementHostile>
+
+  <Recruitment_Reason_SettlementUnwilling>{0}は入植者を送りません</Recruitment_Reason_SettlementUnwilling>
+
+  <Recruitment_Reason_Cooldown>最近依頼したばかりです（あと{0}）</Recruitment_Reason_Cooldown>
+
+  <Recruitment_Reason_CaravanSilver>キャラバンのシルバーが足りません（必要 {0}、所持 {1}）</Recruitment_Reason_CaravanSilver>
+
+  <Recruitment_EnvoyRequested>{PAWN_labelShort}が{1}に入植者の募集を依頼しました。応募者がいれば、およそ{2}後に入植地に到着します。</Recruitment_EnvoyRequested>
+
+  <Recruitment_LegacyEnvoyRecalled>使者はキャラバンで移動するようになりました。旧バージョンの使者として不在だった{PAWN_labelShort}を呼び戻しました。</Recruitment_LegacyEnvoyRecalled>
+
+  <Recruitment_Comms_CallLabel>入植者募集を呼びかける</Recruitment_Comms_CallLabel>
+
+  <Recruitment_Comms_Info>入植地に加わってくれる人を募ります。</Recruitment_Comms_Info>
+
+  <Recruitment_Comms_Intro>{PAWN_labelShort}が回線を開きました。入植者募集をどの方法で呼びかけますか？</Recruitment_Comms_Intro>
+
+  <Recruitment_Comms_HangUp>回線を閉じる</Recruitment_Comms_HangUp>
+
+  <Recruitment_Command_Request>入植者の募集を依頼</Recruitment_Command_Request>
+
+  <Recruitment_Command_RequestDesc>この拠点に、入植地に加わってくれる人を送ってもらうよう依頼します。\n\n{0}</Recruitment_Command_RequestDesc>
+
+  <Recruitment_CaravanReport>{0}に入植者の募集を依頼しに行く</Recruitment_CaravanReport>
+
+  <Recruitment_DepartureWarning>このキャラバンは{0}に向かいますが、シルバーを{2}しか持っていません。そこで入植者の募集を依頼するには、キャラバンの持ち物から{1}シルバーを払う必要があります。\n\nこのまま出発しますか？</Recruitment_DepartureWarning>
+
+  <Recruitment_Alert_ShortOfSilver>使者のキャラバンのシルバー不足</Recruitment_Alert_ShortOfSilver>
+
+  <Recruitment_Alert_ShortOfSilverDesc>次のキャラバンは拠点に入植者の募集を依頼しに向かっていますが、依頼に必要な{0}シルバーを持っていません。</Recruitment_Alert_ShortOfSilverDesc>
+
+  <Recruitment_Settings_EnvoyCooldown>同じ拠点に再び依頼できるまでの日数: {0}</Recruitment_Settings_EnvoyCooldown>
 
 </LanguageData>

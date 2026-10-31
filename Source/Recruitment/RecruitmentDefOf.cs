@@ -14,8 +14,6 @@ namespace Recruitment
 
         public static LetterDef Recruitment_Applicants;
 
-        public static MainButtonDef Recruitment;
-
         static RecruitmentDefOf()
         {
             DefOfHelper.EnsureInitializedInCtor(typeof(RecruitmentDefOf));

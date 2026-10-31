@@ -19,6 +19,8 @@ namespace Recruitment
 
         public const int DefaultConfirmThreshold = 200;
 
+        public const float DefaultEnvoyCooldownDays = 15f;
+
         public JoinMode joinMode = JoinMode.Choose;
 
         public int maxConcurrentPerMap = 1;
@@ -37,13 +39,12 @@ namespace Recruitment
         /// <summary>Relative weights of getting 0, 1, 2 and 3 applicants.</summary>
         public List<float> applicantWeights = DefaultWeights();
 
-        public float envoyDurationFactorAtZero = EnvoySocialCurve.Default.DurationFactorAtZero;
-
-        public float envoyDurationFactorPerLevel = EnvoySocialCurve.Default.DurationFactorPerLevel;
-
         public float envoyZeroChanceAtZero = EnvoySocialCurve.Default.ZeroChanceAtZero;
 
         public float envoyZeroChancePerLevel = EnvoySocialCurve.Default.ZeroChancePerLevel;
+
+        /// <summary>Days before the same settlement can be asked by an envoy again.</summary>
+        public float envoyCooldownDays = DefaultEnvoyCooldownDays;
 
         // Keyed by RecruitmentMethodDef.defName; a missing entry means "use the def's value".
         public Dictionary<string, int> costOverrides = new Dictionary<string, int>();
@@ -52,7 +53,9 @@ namespace Recruitment
 
         public Dictionary<string, float> maxDaysOverrides = new Dictionary<string, float>();
 
-        public EnvoySocialCurve EnvoyCurve => new EnvoySocialCurve(envoyDurationFactorAtZero, envoyDurationFactorPerLevel, envoyZeroChanceAtZero, envoyZeroChancePerLevel);
+        public EnvoySocialCurve EnvoyCurve => new EnvoySocialCurve(envoyZeroChanceAtZero, envoyZeroChancePerLevel);
+
+        public int EnvoyCooldownTicks => (int)(System.Math.Max(0f, envoyCooldownDays) * RecruitmentDuration.TicksPerDay);
 
         /// <summary>The threshold for <see cref="Logic.ConfirmationRule"/>; negative when confirmation is off.</summary>
         public int EffectiveConfirmThreshold => confirmExpensive ? System.Math.Max(0, confirmThreshold) : -1;
@@ -99,10 +102,9 @@ namespace Recruitment
             confirmExpensive = true;
             confirmThreshold = DefaultConfirmThreshold;
             applicantWeights = DefaultWeights();
-            envoyDurationFactorAtZero = EnvoySocialCurve.Default.DurationFactorAtZero;
-            envoyDurationFactorPerLevel = EnvoySocialCurve.Default.DurationFactorPerLevel;
             envoyZeroChanceAtZero = EnvoySocialCurve.Default.ZeroChanceAtZero;
             envoyZeroChancePerLevel = EnvoySocialCurve.Default.ZeroChancePerLevel;
+            envoyCooldownDays = DefaultEnvoyCooldownDays;
             costOverrides.Clear();
             minDaysOverrides.Clear();
             maxDaysOverrides.Clear();
@@ -119,10 +121,9 @@ namespace Recruitment
             Scribe_Values.Look(ref confirmExpensive, "confirmExpensive", true);
             Scribe_Values.Look(ref confirmThreshold, "confirmThreshold", DefaultConfirmThreshold);
             Scribe_Collections.Look(ref applicantWeights, "applicantWeights", LookMode.Value);
-            Scribe_Values.Look(ref envoyDurationFactorAtZero, "envoyDurationFactorAtZero", EnvoySocialCurve.Default.DurationFactorAtZero);
-            Scribe_Values.Look(ref envoyDurationFactorPerLevel, "envoyDurationFactorPerLevel", EnvoySocialCurve.Default.DurationFactorPerLevel);
             Scribe_Values.Look(ref envoyZeroChanceAtZero, "envoyZeroChanceAtZero", EnvoySocialCurve.Default.ZeroChanceAtZero);
             Scribe_Values.Look(ref envoyZeroChancePerLevel, "envoyZeroChancePerLevel", EnvoySocialCurve.Default.ZeroChancePerLevel);
+            Scribe_Values.Look(ref envoyCooldownDays, "envoyCooldownDays", DefaultEnvoyCooldownDays);
             Scribe_Collections.Look(ref costOverrides, "costOverrides", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref minDaysOverrides, "minDaysOverrides", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref maxDaysOverrides, "maxDaysOverrides", LookMode.Value, LookMode.Value);
