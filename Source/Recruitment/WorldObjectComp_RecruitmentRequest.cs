@@ -45,11 +45,16 @@ namespace Recruitment
                 yield break;
             }
             string label = RecruitmentFloatMenu.OptionLabel(RecruitmentDefOf.Recruitment_Envoy);
+            var arrival = new CaravanArrivalAction_RequestRecruitment(settlement);
             foreach (FloatMenuOption option in CaravanArrivalActionUtility.GetFloatMenuOptions(
                 () => ToFloatMenuReport(component.CanRequestAt(caravan, settlement, checkSilver: true)),
-                () => new CaravanArrivalAction_RequestRecruitment(settlement),
+                () => arrival,
                 label, caravan, settlement.Tile, settlement,
-                confirmActionProxy: go => RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, go)))
+                confirmActionProxy: go => RecruitmentUI.ChooseDestination(map =>
+                {
+                    arrival.SetDestination(map);
+                    RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, go);
+                })))
             {
                 yield return option;
             }
@@ -68,7 +73,7 @@ namespace Recruitment
                 defaultLabel = "Recruitment_Command_Request".Translate(),
                 defaultDesc = "Recruitment_Command_RequestDesc".Translate(RecruitmentFloatMenu.OptionLabel(RecruitmentDefOf.Recruitment_Envoy)),
                 icon = RequestIcon,
-                action = () => RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, () => component.TryRequestAt(caravan, settlement)),
+                action = () => RecruitmentUI.ChooseDestination(map => RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, () => component.TryRequestAt(caravan, settlement, map, destinationSelected: true))),
             };
             AcceptanceReport report = GizmoReports.Get((caravan.ID, settlement.ID), () => component.CanRequestAt(caravan, settlement, checkSilver: true));
             if (!report.Accepted)
@@ -100,6 +105,16 @@ namespace Recruitment
     public class CaravanArrivalAction_RequestRecruitment : CaravanArrivalAction
     {
         private Settlement settlement;
+
+        private Map destination;
+
+        private bool destinationSelected;
+
+        public void SetDestination(Map map)
+        {
+            destination = map;
+            destinationSelected = true;
+        }
 
         public CaravanArrivalAction_RequestRecruitment()
         {
@@ -137,13 +152,16 @@ namespace Recruitment
 
         public override void Arrived(Caravan caravan)
         {
-            GameComponent_Recruitment.Instance?.TryRequestAt(caravan, settlement);
+            GameComponent_Recruitment.Instance?.TryRequestAt(caravan, settlement, destination, destinationSelected);
         }
 
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_References.Look(ref settlement, "settlement");
+            if (Scribe.mode == LoadSaveMode.Saving && destination != null && !Find.Maps.Contains(destination)) destination = null;
+            Scribe_References.Look(ref destination, "destination");
+            Scribe_Values.Look(ref destinationSelected, "destinationSelected");
         }
     }
 }

@@ -12,12 +12,15 @@ namespace Recruitment.Logic
 
         public readonly int FreeColonists;
 
-        public MapCandidate(int id, bool isPlayerHome, bool isSpace, int freeColonists)
+        public readonly bool HasCapacity;
+
+        public MapCandidate(int id, bool isPlayerHome, bool isSpace, int freeColonists, bool hasCapacity = true)
         {
             Id = id;
             IsPlayerHome = isPlayerHome;
             IsSpace = isSpace;
             FreeColonists = freeColonists;
+            HasCapacity = hasCapacity;
         }
     }
 
@@ -28,12 +31,12 @@ namespace Recruitment.Logic
         /// Keeps the original map while it is still a suitable player home; otherwise picks the suitable home
         /// with the most free colonists (lowest id on ties). Returns null when no map is suitable.
         /// </summary>
-        public static int? Pick(IEnumerable<MapCandidate> maps, int originalId, bool allowSurface, bool allowSpace)
+        public static int? Pick(IEnumerable<MapCandidate> maps, int originalId, bool allowSurface, bool allowSpace, bool requireCapacity = false)
         {
             MapCandidate? best = null;
             foreach (MapCandidate map in maps)
             {
-                if (!Suitable(map, allowSurface, allowSpace))
+                if (!Suitable(map, allowSurface, allowSpace) || (requireCapacity && !map.HasCapacity))
                 {
                     continue;
                 }

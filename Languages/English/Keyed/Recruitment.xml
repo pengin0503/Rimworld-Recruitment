@@ -130,4 +130,20 @@
 
   <Recruitment_Settings_EnvoyCooldown>Days before a settlement can be asked again: {0}</Recruitment_Settings_EnvoyCooldown>
 
+  <Recruitment_DestinationOption>Deliver applicants to {0}</Recruitment_DestinationOption>
+  <Recruitment_Reason_RecoveryPending>The decision is saved. Some applicants are being recovered; delivery will retry automatically.</Recruitment_Reason_RecoveryPending>
+  <Recruitment_Dialog_Retry>Retry saved decision</Recruitment_Dialog_Retry>
+  <Recruitment_History_Title>Recruitment history (latest 100 results)</Recruitment_History_Title>
+  <Recruitment_History_Unknown>unrecorded / none</Recruitment_History_Unknown>
+  <Recruitment_History_Summary>{0} — {1} | paid: {2} silver</Recruitment_History_Summary>
+  <Recruitment_History_Route>Origin: {0} | planned destination: {1} | actual: {2}</Recruitment_History_Route>
+  <Recruitment_History_Counts>Arrived: {0} | joined: {1} | rejected: {2} | expired: {3} | generation errors: {4}</Recruitment_History_Counts>
+  <Recruitment_History_Times>Started: day {0} | last result: day {1}</Recruitment_History_Times>
+  <Recruitment_History_Result_Completed>decision completed</Recruitment_History_Result_Completed>
+  <Recruitment_History_Result_AutoJoined>automatically joined</Recruitment_History_Result_AutoJoined>
+  <Recruitment_History_Result_Expired>decision expired</Recruitment_History_Result_Expired>
+  <Recruitment_History_Result_NoApplicants>no applicants answered</Recruitment_History_Result_NoApplicants>
+  <Recruitment_History_Result_NoDestination>destination lost</Recruitment_History_Result_NoDestination>
+  <Recruitment_History_Result_GenerationFailed>applicant generation failed</Recruitment_History_Result_GenerationFailed>
+  <Recruitment_History_Result_RecoveryPending>transfer recovery pending</Recruitment_History_Result_RecoveryPending>
 </LanguageData>
