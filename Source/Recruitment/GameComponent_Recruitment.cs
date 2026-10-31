@@ -26,6 +26,12 @@ namespace Recruitment
 
         private int nextId = 1;
 
+        /// <summary>
+        /// Set when held pawns may have lost their drive or group (after loading, or after a pawn could not be
+        /// placed), so the orphan scan only runs when it can find something.
+        /// </summary>
+        private bool orphanCheckPending = true;
+
         public GameComponent_Recruitment(Game game)
         {
             heldPawns = new ThingOwner<Pawn>(this, oneStackOnly: false, LookMode.Deep);
@@ -270,8 +276,15 @@ namespace Recruitment
             {
                 return;
             }
-            foreach (RecruitmentDrive drive in drives.ToList())
+            // Backwards by index: Arrive and CheckDepartingEnvoy may remove the current drive, and this avoids
+            // copying the list every check.
+            for (int i = drives.Count - 1; i >= 0; i--)
             {
+                if (i >= drives.Count)
+                {
+                    continue;
+                }
+                RecruitmentDrive drive = drives[i];
                 if (drive.state == DriveState.EnvoyDeparting)
                 {
                     CheckDepartingEnvoy(drive);
@@ -283,7 +296,11 @@ namespace Recruitment
                     Arrive(drive);
                 }
             }
-            RecoverOrphans();
+            if (orphanCheckPending)
+            {
+                orphanCheckPending = false;
+                RecoverOrphans();
+            }
         }
 
         /// <summary>Whether the envoy is still on their way out: doing the departure job, or about to (queued behind another job).</summary>
@@ -366,6 +383,8 @@ namespace Recruitment
                     Map home = Find.AnyPlayerHomeMap;
                     if (home == null)
                     {
+                        // No colony to go to yet; look again on a later check.
+                        orphanCheckPending = true;
                         continue;
                     }
                     Log.WarningOnce($"[Recruitment] Bringing back {pawn}, who was held without a recruitment drive.", pawn.thingIDNumber ^ 0x4F525048);
@@ -423,6 +442,7 @@ namespace Recruitment
                 if (!pawn.Spawned && !pawn.Destroyed && pawn.holdingOwner == null)
                 {
                     heldPawns.TryAdd(pawn);
+                    orphanCheckPending = true;
                 }
             }
         }

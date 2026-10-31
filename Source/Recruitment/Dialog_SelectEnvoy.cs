@@ -104,7 +104,7 @@ namespace Recruitment
                     {
                         reports.Clear();
                     }
-                }, extra);
+                }, extra, curve.DurationFactor(social));
             }
         }
     }

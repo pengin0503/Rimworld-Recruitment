@@ -14,7 +14,8 @@ namespace Recruitment
         public static float Now => Time.realtimeSinceStartup;
 
         /// <summary>Runs <paramref name="action"/>, first asking for confirmation if the method costs at least the configured threshold.</summary>
-        public static void ConfirmThen(RecruitmentMethodDef method, Action action, TaggedString? extra = null)
+        /// <param name="durationFactor">Applied to the shown day range, e.g. the envoy's social modifier, so the dialog shows the real duration.</param>
+        public static void ConfirmThen(RecruitmentMethodDef method, Action action, TaggedString? extra = null, float durationFactor = 1f)
         {
             int cost = method.Cost;
             if (!ConfirmationRule.ShouldConfirm(cost, RecruitmentMod.Settings.EffectiveConfirmThreshold))
@@ -23,7 +24,7 @@ namespace Recruitment
                 return;
             }
             FloatRange days = method.Days;
-            TaggedString text = "Recruitment_Confirm_Text".Translate(method.LabelCap, cost, days.min.ToString("0.#"), days.max.ToString("0.#"), method.arrivalLabel);
+            TaggedString text = "Recruitment_Confirm_Text".Translate(method.LabelCap, cost, (days.min * durationFactor).ToString("0.#"), (days.max * durationFactor).ToString("0.#"), method.arrivalLabel);
             if (extra.HasValue)
             {
                 text += "\n\n" + extra.Value;

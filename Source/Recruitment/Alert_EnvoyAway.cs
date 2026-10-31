@@ -14,6 +14,11 @@ namespace Recruitment
     {
         private readonly List<RecruitmentDrive> away = new List<RecruitmentDrive>();
 
+        // The label is drawn every frame while the alert shows; rebuild it only when the count changes.
+        private int labelCount = -1;
+
+        private string label;
+
         public Alert_EnvoyAway()
         {
             defaultPriority = AlertPriority.Medium;
@@ -21,7 +26,13 @@ namespace Recruitment
 
         public override string GetLabel()
         {
-            return "Recruitment_Alert_EnvoyAway".Translate(Away().Count);
+            // GetReport (run every few frames by the alerts readout) keeps the list current.
+            if (away.Count != labelCount)
+            {
+                labelCount = away.Count;
+                label = "Recruitment_Alert_EnvoyAway".Translate(labelCount);
+            }
+            return label;
         }
 
         public override TaggedString GetExplanation()
