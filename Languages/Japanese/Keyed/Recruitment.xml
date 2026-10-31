@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Recruitment_ModName>入植者募集</Recruitment_ModName>
+
+  <!-- 開始 -->
+  <Recruitment_FloatMenu_Start>{0}（{1}シルバー、{2}〜{3}日）</Recruitment_FloatMenu_Start>
+  <Recruitment_Started>{0}を開始しました。応募者がいれば、およそ{1}後に到着します。</Recruitment_Started>
+  <Recruitment_Reason_Research>研究が必要: {0}</Recruitment_Reason_Research>
+  <Recruitment_Reason_NotInSpace>宇宙では使えません</Recruitment_Reason_NotInSpace>
+  <Recruitment_Reason_OnlyInSpace>宇宙でしか使えません</Recruitment_Reason_OnlyInSpace>
+  <Recruitment_Reason_Concurrent>このマップではすでに{0}件の募集が進行中です</Recruitment_Reason_Concurrent>
+  <Recruitment_Reason_Silver>シルバーが足りません（必要 {0}、倉庫・居住エリア内に {1}）</Recruitment_Reason_Silver>
+  <Recruitment_Reason_NoFaction>応募者を送ってくれる派閥がありません</Recruitment_Reason_NoFaction>
+  <Recruitment_Reason_ConsoleUnusable>通信機は今は使えません</Recruitment_Reason_ConsoleUnusable>
+  <Recruitment_Reason_NoDestination>応募者が向かえる拠点がありません。</Recruitment_Reason_NoDestination>
+
+  <!-- 使者 -->
+  <Recruitment_EnvoyReason_AlreadyEnvoy>すでに使者です</Recruitment_EnvoyReason_AlreadyEnvoy>
+  <Recruitment_EnvoyReason_NotFreeColonist>使者になれるのは自由な入植者だけです</Recruitment_EnvoyReason_NotFreeColonist>
+  <Recruitment_EnvoyReason_NotAdult>子供は使者になれません</Recruitment_EnvoyReason_NotAdult>
+  <Recruitment_EnvoyReason_Incapacitated>今は出発できる状態ではありません</Recruitment_EnvoyReason_Incapacitated>
+  <Recruitment_EnvoyReason_LastColonist>ほかに自由な入植者が1人以上必要です</Recruitment_EnvoyReason_LastColonist>
+  <Recruitment_EnvoyReason_NoExit>マップの端まで行けません</Recruitment_EnvoyReason_NoExit>
+  <Recruitment_EnvoyDispatched>{PAWN_labelShort}が使者として出発します。</Recruitment_EnvoyDispatched>
+  <Recruitment_EnvoyLeft>{PAWN_labelShort}が使者として旅立ちました。およそ{1}後に戻ります。</Recruitment_EnvoyLeft>
+  <Recruitment_EnvoyCancelled>{0}が出発前に止まったため、使者の派遣を取りやめました。{1}シルバーを返却しました。</Recruitment_EnvoyCancelled>
+  <Recruitment_EnvoyWaiting>{PAWN_labelShort}は使者の務めを終えましたが、帰る拠点がありません。拠点ができるまで待機します。</Recruitment_EnvoyWaiting>
+  <Recruitment_EnvoyReturned>{PAWN_labelShort}が使者の旅から戻りました。</Recruitment_EnvoyReturned>
+  <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort}は1人で戻ってきます。</Recruitment_EnvoyReturnedAlone>
+  <Recruitment_EnvoyReturnedWith>{PAWN_labelShort}も一緒に戻ってきます。</Recruitment_EnvoyReturnedWith>
+  <Recruitment_Envoy_Title>使者を派遣する</Recruitment_Envoy_Title>
+  <Recruitment_Envoy_Explanation>費用は{0}シルバーです。使者はマップの端から出発し、募集が終わるまで不在になります（社交補正前で{1}〜{2}日）。社交スキルが高いほど、期間が短く、応募者0人になりにくくなります。</Recruitment_Envoy_Explanation>
+  <Recruitment_Envoy_Preview>社交{0}: 期間 {1}、0人の確率 {2}</Recruitment_Envoy_Preview>
+  <Recruitment_Envoy_Send>派遣する</Recruitment_Envoy_Send>
+
+  <!-- レター -->
+  <Recruitment_FromFaction>{0}出身</Recruitment_FromFaction>
+  <Recruitment_FromNowhere>無所属</Recruitment_FromNowhere>
+  <Recruitment_LetterApplicantsLabel>応募者{0}人が到着</Recruitment_LetterApplicantsLabel>
+  <Recruitment_LetterApplicants>{0}に応じて、{2}の応募者が{1}人到着しました。\n\nこのレターを開いて応募者を確認し、採用する人を選んでください。{3}時間以内に決めないと、応募者は去ってしまいます。</Recruitment_LetterApplicants>
+  <Recruitment_LetterJoinedLabel>新しい入植者{0}人</Recruitment_LetterJoinedLabel>
+  <Recruitment_LetterJoined>{0}によって、次の人々が入植地に加わりました。\n\n{1}</Recruitment_LetterJoined>
+  <Recruitment_LetterFailedLabel>募集失敗</Recruitment_LetterFailedLabel>
+  <Recruitment_LetterNoApplicants>{0}に応じた人はいませんでした。支払ったシルバーは戻りません。</Recruitment_LetterNoApplicants>
+  <Recruitment_LetterNoDestination>{0}に応じた人はいましたが、たどり着ける拠点がなかったため諦めました。</Recruitment_LetterNoDestination>
+  <Recruitment_ApplicantsLeft>応募者{0}人が返事を待ちきれずに去りました。</Recruitment_ApplicantsLeft>
+
+  <!-- 応募者画面 -->
+  <Recruitment_Dialog_Title>応募者（{0}人）</Recruitment_Dialog_Title>
+  <Recruitment_Dialog_Subtitle>{0}への応募です。決定までの残り時間: {1}</Recruitment_Dialog_Subtitle>
+  <Recruitment_Dialog_Accepted>採用</Recruitment_Dialog_Accepted>
+  <Recruitment_Dialog_Rejected>不採用</Recruitment_Dialog_Rejected>
+  <Recruitment_Dialog_AcceptAll>全員採用</Recruitment_Dialog_AcceptAll>
+  <Recruitment_Dialog_RejectAll>全員不採用</Recruitment_Dialog_RejectAll>
+  <Recruitment_Dialog_Later>あとで決める</Recruitment_Dialog_Later>
+  <Recruitment_Dialog_Confirm>確定（{0}人が加入）</Recruitment_Dialog_Confirm>
+  <Recruitment_Dialog_Age>{0}歳</Recruitment_Dialog_Age>
+  <Recruitment_Dialog_Origin>出身: {0}</Recruitment_Dialog_Origin>
+  <Recruitment_Dialog_Ideo>思想: {0}</Recruitment_Dialog_Ideo>
+  <Recruitment_Dialog_Backstory>生い立ち: {0}</Recruitment_Dialog_Backstory>
+  <Recruitment_Dialog_Traits>才能・性格: {0}</Recruitment_Dialog_Traits>
+  <Recruitment_Dialog_Skills>得意な技能: {0}</Recruitment_Dialog_Skills>
+  <Recruitment_Dialog_Incapable>できない仕事: {0}</Recruitment_Dialog_Incapable>
+  <Recruitment_Dialog_Health>健康: {0}</Recruitment_Dialog_Health>
+  <Recruitment_Dialog_Healthy>問題なし</Recruitment_Dialog_Healthy>
+
+  <!-- メインタブ -->
+  <Recruitment_Tab_SendEnvoy>使者を派遣する…</Recruitment_Tab_SendEnvoy>
+  <Recruitment_Tab_NoMap>マップが選択されていません</Recruitment_Tab_NoMap>
+  <Recruitment_Tab_Active>進行中の募集</Recruitment_Tab_Active>
+  <Recruitment_Tab_Waiting>判断待ちの応募者</Recruitment_Tab_Waiting>
+  <Recruitment_Tab_Methods>募集方式</Recruitment_Tab_Methods>
+  <Recruitment_Tab_None>なし</Recruitment_Tab_None>
+  <Recruitment_Tab_DriveLine>{0}（{1}、応募者は{2}）: {3}</Recruitment_Tab_DriveLine>
+  <Recruitment_Tab_MapLost>拠点が失われたため別の拠点へ</Recruitment_Tab_MapLost>
+  <Recruitment_Tab_ArrivesIn>到着まで {0}</Recruitment_Tab_ArrivesIn>
+  <Recruitment_Tab_EnvoyDeparting>{0}が出発中</Recruitment_Tab_EnvoyDeparting>
+  <Recruitment_Tab_Envoy>（使者: {0}）</Recruitment_Tab_Envoy>
+  <Recruitment_Tab_GroupLine>{1}の応募者{0}人、残り{2}</Recruitment_Tab_GroupLine>
+  <Recruitment_Tab_Review>確認する</Recruitment_Tab_Review>
+  <Recruitment_Tab_MethodLine>{0}: {1}シルバー、{2}〜{3}日</Recruitment_Tab_MethodLine>
+  <Recruitment_Tab_NeedsResearch>（研究が必要: {0}）</Recruitment_Tab_NeedsResearch>
+  <Recruitment_Tab_HowTo_Trader>入植者を選択して、来訪中の商人を右クリックします。</Recruitment_Tab_HowTo_Trader>
+  <Recruitment_Tab_HowTo_Envoy>上の「使者を派遣する」から行います。</Recruitment_Tab_HowTo_Envoy>
+  <Recruitment_Tab_HowTo_CommsConsole>入植者を選択して、電力の通った通信機を右クリックします。</Recruitment_Tab_HowTo_CommsConsole>
+
+  <!-- 設定 -->
+  <Recruitment_Settings_General>全般</Recruitment_Settings_General>
+  <Recruitment_Settings_JoinMode>加入方式</Recruitment_Settings_JoinMode>
+  <Recruitment_JoinMode_Choose>受け入れ選択</Recruitment_JoinMode_Choose>
+  <Recruitment_JoinMode_AutoJoin>自動加入</Recruitment_JoinMode_AutoJoin>
+  <Recruitment_Settings_MaxConcurrent>マップごとの同時募集数: {0}</Recruitment_Settings_MaxConcurrent>
+  <Recruitment_Settings_DecisionHours>応募者を判断する時間: {0}時間</Recruitment_Settings_DecisionHours>
+  <Recruitment_Settings_IncludePermanentEnemies>恒久的に敵対する派閥からも応募者が来る</Recruitment_Settings_IncludePermanentEnemies>
+  <Recruitment_Settings_IncludePermanentEnemiesDesc>海賊など。初期設定はオフです。</Recruitment_Settings_IncludePermanentEnemiesDesc>
+  <Recruitment_Settings_AllowChildren>子供の応募を許可する</Recruitment_Settings_AllowChildren>
+  <Recruitment_Settings_AllowChildrenDesc>ストーリーテラーの設定で子供が許可されている場合のみ有効です。</Recruitment_Settings_AllowChildrenDesc>
+  <Recruitment_Settings_Applicants>応募者の人数</Recruitment_Settings_Applicants>
+  <Recruitment_Settings_ApplicantWeight>{0}人: 重み {1}（{2}）</Recruitment_Settings_ApplicantWeight>
+  <Recruitment_Settings_Methods>費用と期間</Recruitment_Settings_Methods>
+  <Recruitment_Settings_Cost>シルバー</Recruitment_Settings_Cost>
+  <Recruitment_Settings_MinDays>最短日数</Recruitment_Settings_MinDays>
+  <Recruitment_Settings_MaxDays>最長日数</Recruitment_Settings_MaxDays>
+  <Recruitment_Settings_MinAboveMax>最短が最長を上回っています。両者を入れ替えて扱います。</Recruitment_Settings_MinAboveMax>
+  <Recruitment_Settings_Envoy>使者の社交スキル</Recruitment_Settings_Envoy>
+  <Recruitment_Settings_EnvoyDurationAtZero>社交0での期間: {0}</Recruitment_Settings_EnvoyDurationAtZero>
+  <Recruitment_Settings_EnvoyDurationPerLevel>社交1レベルごとの期間短縮: {0}</Recruitment_Settings_EnvoyDurationPerLevel>
+  <Recruitment_Settings_EnvoyZeroAtZero>社交0での応募者0人の確率: {0}</Recruitment_Settings_EnvoyZeroAtZero>
+  <Recruitment_Settings_EnvoyZeroPerLevel>社交1レベルごとのその確率の低下: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
+  <Recruitment_Settings_EnvoyPreview>社交0: 期間 {0}、0人 {1} ／ 社交10: {2}、{3} ／ 社交20: {4}、{5}</Recruitment_Settings_EnvoyPreview>
+  <Recruitment_Settings_Reset>初期設定に戻す</Recruitment_Settings_Reset>
+
+</LanguageData>

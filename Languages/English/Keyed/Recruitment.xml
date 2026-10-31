@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Recruitment_ModName>Colonist Recruitment</Recruitment_ModName>
+
+  <!-- Starting -->
+  <Recruitment_FloatMenu_Start>{0} ({1} silver, {2}-{3} days)</Recruitment_FloatMenu_Start>
+  <Recruitment_Started>{0} started. Applicants, if any, are expected in about {1}.</Recruitment_Started>
+  <Recruitment_Reason_Research>needs research: {0}</Recruitment_Reason_Research>
+  <Recruitment_Reason_NotInSpace>cannot be used in space</Recruitment_Reason_NotInSpace>
+  <Recruitment_Reason_OnlyInSpace>can only be used in space</Recruitment_Reason_OnlyInSpace>
+  <Recruitment_Reason_Concurrent>this map already has {0} recruitment drive(s) running</Recruitment_Reason_Concurrent>
+  <Recruitment_Reason_Silver>not enough silver ({0} needed, {1} available in storage or the home area)</Recruitment_Reason_Silver>
+  <Recruitment_Reason_NoFaction>no faction is willing to send applicants</Recruitment_Reason_NoFaction>
+  <Recruitment_Reason_ConsoleUnusable>the comms console cannot be used now</Recruitment_Reason_ConsoleUnusable>
+  <Recruitment_Reason_NoDestination>There is no colony the applicants can travel to.</Recruitment_Reason_NoDestination>
+
+  <!-- Envoys -->
+  <Recruitment_EnvoyReason_AlreadyEnvoy>already an envoy</Recruitment_EnvoyReason_AlreadyEnvoy>
+  <Recruitment_EnvoyReason_NotFreeColonist>only free colonists can be envoys</Recruitment_EnvoyReason_NotFreeColonist>
+  <Recruitment_EnvoyReason_NotAdult>children cannot be envoys</Recruitment_EnvoyReason_NotAdult>
+  <Recruitment_EnvoyReason_Incapacitated>cannot travel right now</Recruitment_EnvoyReason_Incapacitated>
+  <Recruitment_EnvoyReason_LastColonist>the colony needs at least one other free colonist</Recruitment_EnvoyReason_LastColonist>
+  <Recruitment_EnvoyReason_NoExit>cannot reach the edge of the map</Recruitment_EnvoyReason_NoExit>
+  <Recruitment_EnvoyDispatched>{PAWN_labelShort} is heading out as an envoy.</Recruitment_EnvoyDispatched>
+  <Recruitment_EnvoyLeft>{PAWN_labelShort} has left as an envoy and should be back in about {1}.</Recruitment_EnvoyLeft>
+  <Recruitment_EnvoyCancelled>{0} stopped before leaving, so the envoy trip was called off. {1} silver was returned.</Recruitment_EnvoyCancelled>
+  <Recruitment_EnvoyWaiting>{PAWN_labelShort} has finished the envoy trip but there is no colony to return to. {PAWN_pronoun} will wait until there is one.</Recruitment_EnvoyWaiting>
+  <Recruitment_EnvoyReturned>{PAWN_labelShort} has returned from the envoy trip.</Recruitment_EnvoyReturned>
+  <Recruitment_EnvoyReturnedAlone>{PAWN_labelShort} is coming back alone.</Recruitment_EnvoyReturnedAlone>
+  <Recruitment_EnvoyReturnedWith>{PAWN_labelShort} is coming back with them.</Recruitment_EnvoyReturnedWith>
+  <Recruitment_Envoy_Title>Send an envoy</Recruitment_Envoy_Title>
+  <Recruitment_Envoy_Explanation>Costs {0} silver. The envoy walks off the map and is away for the whole drive ({1}-{2} days before the social modifier). Higher social skill shortens the trip and makes it less likely that nobody comes.</Recruitment_Envoy_Explanation>
+  <Recruitment_Envoy_Preview>Social {0}: duration {1}, chance of nobody {2}</Recruitment_Envoy_Preview>
+  <Recruitment_Envoy_Send>Send</Recruitment_Envoy_Send>
+
+  <!-- Letters -->
+  <Recruitment_FromFaction>from {0}</Recruitment_FromFaction>
+  <Recruitment_FromNowhere>with no faction</Recruitment_FromNowhere>
+  <Recruitment_LetterApplicantsLabel>{0} applicant(s) arrived</Recruitment_LetterApplicantsLabel>
+  <Recruitment_LetterApplicants>{1} applicant(s) {2} answered your {0}.\n\nOpen this letter to review them and choose whom to accept. If you do not decide within {3} hours, they will leave.</Recruitment_LetterApplicants>
+  <Recruitment_LetterJoinedLabel>{0} new colonist(s)</Recruitment_LetterJoinedLabel>
+  <Recruitment_LetterJoined>Thanks to your {0}, these people have joined the colony:\n\n{1}</Recruitment_LetterJoined>
+  <Recruitment_LetterFailedLabel>Recruitment failed</Recruitment_LetterFailedLabel>
+  <Recruitment_LetterNoApplicants>Nobody answered your {0}. The silver spent is not returned.</Recruitment_LetterNoApplicants>
+  <Recruitment_LetterNoDestination>Applicants answered your {0}, but there was no colony they could reach, so they gave up.</Recruitment_LetterNoDestination>
+  <Recruitment_ApplicantsLeft>{0} applicant(s) gave up waiting for an answer and left.</Recruitment_ApplicantsLeft>
+
+  <!-- Applicant dialog -->
+  <Recruitment_Dialog_Title>Applicants ({0})</Recruitment_Dialog_Title>
+  <Recruitment_Dialog_Subtitle>Answered your {0}. Time left to decide: {1}.</Recruitment_Dialog_Subtitle>
+  <Recruitment_Dialog_Accepted>Accept</Recruitment_Dialog_Accepted>
+  <Recruitment_Dialog_Rejected>Reject</Recruitment_Dialog_Rejected>
+  <Recruitment_Dialog_AcceptAll>Accept all</Recruitment_Dialog_AcceptAll>
+  <Recruitment_Dialog_RejectAll>Reject all</Recruitment_Dialog_RejectAll>
+  <Recruitment_Dialog_Later>Decide later</Recruitment_Dialog_Later>
+  <Recruitment_Dialog_Confirm>Confirm ({0} joining)</Recruitment_Dialog_Confirm>
+  <Recruitment_Dialog_Age>Age {0}</Recruitment_Dialog_Age>
+  <Recruitment_Dialog_Origin>Origin: {0}</Recruitment_Dialog_Origin>
+  <Recruitment_Dialog_Ideo>Ideoligion: {0}</Recruitment_Dialog_Ideo>
+  <Recruitment_Dialog_Backstory>Backstory: {0}</Recruitment_Dialog_Backstory>
+  <Recruitment_Dialog_Traits>Traits: {0}</Recruitment_Dialog_Traits>
+  <Recruitment_Dialog_Skills>Best skills: {0}</Recruitment_Dialog_Skills>
+  <Recruitment_Dialog_Incapable>Incapable of: {0}</Recruitment_Dialog_Incapable>
+  <Recruitment_Dialog_Health>Health: {0}</Recruitment_Dialog_Health>
+  <Recruitment_Dialog_Healthy>no problems</Recruitment_Dialog_Healthy>
+
+  <!-- Main tab -->
+  <Recruitment_Tab_SendEnvoy>Send an envoy...</Recruitment_Tab_SendEnvoy>
+  <Recruitment_Tab_NoMap>no map is selected</Recruitment_Tab_NoMap>
+  <Recruitment_Tab_Active>Running drives</Recruitment_Tab_Active>
+  <Recruitment_Tab_Waiting>Applicants waiting for a decision</Recruitment_Tab_Waiting>
+  <Recruitment_Tab_Methods>Methods</Recruitment_Tab_Methods>
+  <Recruitment_Tab_None>None.</Recruitment_Tab_None>
+  <Recruitment_Tab_DriveLine>{0} at {1}, applicants {2}: {3}</Recruitment_Tab_DriveLine>
+  <Recruitment_Tab_MapLost>(colony gone, will go elsewhere)</Recruitment_Tab_MapLost>
+  <Recruitment_Tab_ArrivesIn>arrival in {0}</Recruitment_Tab_ArrivesIn>
+  <Recruitment_Tab_EnvoyDeparting>{0} is walking out</Recruitment_Tab_EnvoyDeparting>
+  <Recruitment_Tab_Envoy>(envoy: {0})</Recruitment_Tab_Envoy>
+  <Recruitment_Tab_GroupLine>{0} applicant(s) from {1}, {2} left</Recruitment_Tab_GroupLine>
+  <Recruitment_Tab_Review>Review</Recruitment_Tab_Review>
+  <Recruitment_Tab_MethodLine>{0}: {1} silver, {2}-{3} days</Recruitment_Tab_MethodLine>
+  <Recruitment_Tab_NeedsResearch>(needs research: {0})</Recruitment_Tab_NeedsResearch>
+  <Recruitment_Tab_HowTo_Trader>Select a colonist and right-click a visiting trader.</Recruitment_Tab_HowTo_Trader>
+  <Recruitment_Tab_HowTo_Envoy>Use "Send an envoy" above.</Recruitment_Tab_HowTo_Envoy>
+  <Recruitment_Tab_HowTo_CommsConsole>Select a colonist and right-click a powered comms console.</Recruitment_Tab_HowTo_CommsConsole>
+
+  <!-- Settings -->
+  <Recruitment_Settings_General>General</Recruitment_Settings_General>
+  <Recruitment_Settings_JoinMode>How applicants join</Recruitment_Settings_JoinMode>
+  <Recruitment_JoinMode_Choose>Review and choose</Recruitment_JoinMode_Choose>
+  <Recruitment_JoinMode_AutoJoin>Join automatically</Recruitment_JoinMode_AutoJoin>
+  <Recruitment_Settings_MaxConcurrent>Drives running at once per map: {0}</Recruitment_Settings_MaxConcurrent>
+  <Recruitment_Settings_DecisionHours>Hours to decide on applicants: {0}</Recruitment_Settings_DecisionHours>
+  <Recruitment_Settings_IncludePermanentEnemies>Applicants can come from permanently hostile factions</Recruitment_Settings_IncludePermanentEnemies>
+  <Recruitment_Settings_IncludePermanentEnemiesDesc>For example pirates. Off by default.</Recruitment_Settings_IncludePermanentEnemiesDesc>
+  <Recruitment_Settings_AllowChildren>Children can apply</Recruitment_Settings_AllowChildren>
+  <Recruitment_Settings_AllowChildrenDesc>Only when the storyteller settings allow children.</Recruitment_Settings_AllowChildrenDesc>
+  <Recruitment_Settings_Applicants>Number of applicants</Recruitment_Settings_Applicants>
+  <Recruitment_Settings_ApplicantWeight>{0} applicant(s): weight {1} ({2})</Recruitment_Settings_ApplicantWeight>
+  <Recruitment_Settings_Methods>Cost and duration</Recruitment_Settings_Methods>
+  <Recruitment_Settings_Cost>Silver</Recruitment_Settings_Cost>
+  <Recruitment_Settings_MinDays>Minimum days</Recruitment_Settings_MinDays>
+  <Recruitment_Settings_MaxDays>Maximum days</Recruitment_Settings_MaxDays>
+  <Recruitment_Settings_MinAboveMax>The minimum is above the maximum; the two will be swapped.</Recruitment_Settings_MinAboveMax>
+  <Recruitment_Settings_Envoy>Envoy social skill</Recruitment_Settings_Envoy>
+  <Recruitment_Settings_EnvoyDurationAtZero>Duration at social 0: {0}</Recruitment_Settings_EnvoyDurationAtZero>
+  <Recruitment_Settings_EnvoyDurationPerLevel>Duration reduction per social level: {0}</Recruitment_Settings_EnvoyDurationPerLevel>
+  <Recruitment_Settings_EnvoyZeroAtZero>Chance of nobody at social 0: {0}</Recruitment_Settings_EnvoyZeroAtZero>
+  <Recruitment_Settings_EnvoyZeroPerLevel>Reduction of that chance per social level: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
+  <Recruitment_Settings_EnvoyPreview>Social 0: duration {0}, nobody {1} / Social 10: {2}, {3} / Social 20: {4}, {5}</Recruitment_Settings_EnvoyPreview>
+  <Recruitment_Settings_Reset>Reset to defaults</Recruitment_Settings_Reset>
+
+</LanguageData>

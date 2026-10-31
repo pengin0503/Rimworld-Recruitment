@@ -1,0 +1,122 @@
+using System.Collections.Generic;
+using System.Linq;
+using RimWorld;
+using Verse;
+using Verse.AI;
+
+namespace Recruitment
+{
+    internal static class RecruitmentFloatMenu
+    {
+        public static string OptionLabel(RecruitmentMethodDef method)
+        {
+            FloatRange days = method.Days;
+            return "Recruitment_FloatMenu_Start".Translate(method.LabelCap, method.Cost, days.min.ToString("0.#"), days.max.ToString("0.#"));
+        }
+
+        public static FloatMenuOption Disabled(RecruitmentMethodDef method, string reason)
+        {
+            return new FloatMenuOption(OptionLabel(method) + ": " + reason, null);
+        }
+    }
+
+    /// <summary>"Ask to spread word of the colony" on a visiting trader.</summary>
+    public class FloatMenuOptionProvider_RecruitViaTrader : FloatMenuOptionProvider
+    {
+        protected override bool Drafted => true;
+
+        protected override bool Undrafted => true;
+
+        protected override bool Multiselect => false;
+
+        public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+        {
+            RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Caravan;
+            GameComponent_Recruitment component = GameComponent_Recruitment.Instance;
+            if (component == null || clickedPawn.TraderKind == null || !((ITrader)clickedPawn).CanTradeNow)
+            {
+                yield break;
+            }
+            Pawn negotiator = context.FirstSelectedPawn;
+            if (!negotiator.CanReach(clickedPawn, PathEndMode.Touch, Danger.Deadly))
+            {
+                yield return RecruitmentFloatMenu.Disabled(method, "NoPath".Translate().CapitalizeFirst());
+                yield break;
+            }
+            AcceptanceReport canTrade = negotiator.CanTradeWith(clickedPawn.Faction, clickedPawn.TraderKind);
+            if (!canTrade.Accepted)
+            {
+                yield return RecruitmentFloatMenu.Disabled(method, canTrade.Reason.NullOrEmpty() ? "MissingTitleAbility".Translate().CapitalizeFirst().Resolve() : canTrade.Reason);
+                yield break;
+            }
+            AcceptanceReport canStart = component.CanStart(method, context.map, needsOriginLottery: false);
+            if (!canStart.Accepted)
+            {
+                yield return RecruitmentFloatMenu.Disabled(method, canStart.Reason);
+                yield break;
+            }
+            yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(method), () =>
+            {
+                Job job = JobMaker.MakeJob(method.startJob, clickedPawn);
+                job.playerForced = true;
+                negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+            }, MenuOptionPriority.InitiateSocial, null, clickedPawn), negotiator, clickedPawn);
+        }
+    }
+
+    /// <summary>Radio and orbital recruitment on a comms console.</summary>
+    public class FloatMenuOptionProvider_RecruitViaComms : FloatMenuOptionProvider
+    {
+        protected override bool Drafted => true;
+
+        protected override bool Undrafted => true;
+
+        protected override bool Multiselect => false;
+
+        public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+        {
+            GameComponent_Recruitment component = GameComponent_Recruitment.Instance;
+            if (component == null || !(clickedThing is Building_CommsConsole console))
+            {
+                yield break;
+            }
+            Pawn pawn = context.FirstSelectedPawn;
+            foreach (RecruitmentMethodDef method in RecruitmentMethodDef.AllInOrder.Where(m => m.startKind == RecruitmentStartKind.CommsConsole))
+            {
+                string reason = null;
+                if (!pawn.CanReach(console, PathEndMode.InteractionCell, Danger.Some))
+                {
+                    reason = "NoPath".Translate().CapitalizeFirst();
+                }
+                else if (!console.CanUseCommsNow)
+                {
+                    reason = "Recruitment_Reason_ConsoleUnusable".Translate();
+                }
+                else if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
+                {
+                    reason = "IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, pawn.Named("PAWN"));
+                }
+                else
+                {
+                    AcceptanceReport canStart = component.CanStart(method, context.map, needsOriginLottery: true);
+                    if (!canStart.Accepted)
+                    {
+                        reason = canStart.Reason;
+                    }
+                }
+                if (reason != null)
+                {
+                    yield return RecruitmentFloatMenu.Disabled(method, reason);
+                    continue;
+                }
+                RecruitmentMethodDef chosen = method;
+                yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(chosen), () =>
+                {
+                    Job job = JobMaker.MakeJob(chosen.startJob, console);
+                    job.playerForced = true;
+                    pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                }, MenuOptionPriority.Default, null, console), pawn, console);
+            }
+        }
+    }
+}
