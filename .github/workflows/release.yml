@@ -21,6 +21,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify manually selected release tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TAG" != v* ]] || ! git check-ref-format "refs/tags/$TAG"; then
+            echo "::error::Version must be a valid Git tag beginning with v."
+            exit 1
+          fi
+
+          # --exit-code returns 2 when the tag is absent; other errors fail closed.
+          if git ls-remote --exit-code --refs origin "refs/tags/$TAG" > /dev/null; then
+            git fetch --no-tags origin "refs/tags/$TAG"
+            tag_commit=$(git rev-parse "FETCH_HEAD^{commit}")
+            checkout_commit=$(git rev-parse HEAD)
+            if [[ "$tag_commit" != "$checkout_commit" ]]; then
+              echo "::error::The existing release tag points to a different commit."
+              exit 1
+            fi
+          else
+            status=$?
+            if [[ "$status" -ne 2 ]]; then
+              echo "::error::Unable to check the remote release tag (git exit $status)."
+              exit "$status"
+            fi
+          fi
+
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
