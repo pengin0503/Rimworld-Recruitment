@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and verify the committed DLL
+        run: |
+          dotnet build Source/Recruitment -c Release
+          git diff --exit-code -- 1.7/Assemblies/Recruitment.dll
+          python3 tools/check_mod.py
+
+      - name: Package the mod folder
+        run: |
+          mkdir -p "dist/ColonistRecruitment"
+          cp -r About 1.7 Defs Languages Patches Textures "dist/ColonistRecruitment/"
+          (cd dist && zip -r "ColonistRecruitment-${GITHUB_REF_NAME}.zip" ColonistRecruitment)
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Colonist Recruitment ${{ github.ref_name }}
+          files: dist/ColonistRecruitment-${{ github.ref_name }}.zip
+          body: |
+            RimWorld 1.7 用。前提MOD: Harmony（brrainz.harmony）。
+            zip を展開した `ColonistRecruitment` フォルダーを `RimWorld/Mods/` に置き、MOD 一覧で Harmony の下で有効にしてください。
