@@ -47,6 +47,13 @@ namespace Recruitment
             s.decisionHours = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_DecisionHours".Translate(s.decisionHours.ToString("0")), s.decisionHours, 1f, 120f));
             listing.CheckboxLabeled("Recruitment_Settings_IncludePermanentEnemies".Translate(), ref s.includePermanentEnemies, "Recruitment_Settings_IncludePermanentEnemiesDesc".Translate());
             listing.CheckboxLabeled("Recruitment_Settings_AllowChildren".Translate(), ref s.allowChildren, "Recruitment_Settings_AllowChildrenDesc".Translate());
+            listing.CheckboxLabeled("Recruitment_Settings_ConfirmExpensive".Translate(), ref s.confirmExpensive, "Recruitment_Settings_ConfirmExpensiveDesc".Translate());
+            if (s.confirmExpensive)
+            {
+                string thresholdBuffer = Buffer("confirmThreshold", s.confirmThreshold.ToString());
+                listing.TextFieldNumericLabeled("  " + "Recruitment_Settings_ConfirmThreshold".Translate(), ref s.confirmThreshold, ref thresholdBuffer, 0f, 1000000f);
+                buffers["confirmThreshold"] = thresholdBuffer;
+            }
 
             Heading(listing, "Recruitment_Settings_Applicants");
             float total = 0f;

@@ -14,6 +14,14 @@
   <Recruitment_Reason_NoFaction>no faction is willing to send applicants</Recruitment_Reason_NoFaction>
   <Recruitment_Reason_ConsoleUnusable>the comms console cannot be used now</Recruitment_Reason_ConsoleUnusable>
   <Recruitment_Reason_NoDestination>There is no colony the applicants can travel to.</Recruitment_Reason_NoDestination>
+  <Recruitment_TraderLeft>{PAWN_labelShort} could not finish asking: the trader left or stopped trading.</Recruitment_TraderLeft>
+  <Recruitment_BroadcastInterrupted>{PAWN_labelShort} could not finish the broadcast: the comms console stopped working.</Recruitment_BroadcastInterrupted>
+  <Recruitment_Confirm_Title>Start recruitment?</Recruitment_Confirm_Title>
+  <Recruitment_Confirm_Text>{0}\n\nCost: {1} silver (not returned if nobody applies)\nDuration: {2}-{3} days\nApplicants: {4}</Recruitment_Confirm_Text>
+  <Recruitment_Confirm_Envoy>{PAWN_labelShort} will be away for the whole drive.</Recruitment_Confirm_Envoy>
+  <Recruitment_Alert_EnvoyAway>Envoys away: {0}</Recruitment_Alert_EnvoyAway>
+  <Recruitment_Alert_EnvoyAwayDesc>These colonists are away recruiting as envoys and will come back with any applicants. Click to open the recruitment tab.</Recruitment_Alert_EnvoyAwayDesc>
+  <Recruitment_Alert_EnvoyWaiting>waiting for a colony to return to</Recruitment_Alert_EnvoyWaiting>
 
   <!-- Envoys -->
   <Recruitment_EnvoyReason_AlreadyEnvoy>already an envoy</Recruitment_EnvoyReason_AlreadyEnvoy>
@@ -97,6 +105,9 @@
   <Recruitment_Settings_IncludePermanentEnemiesDesc>For example pirates. Off by default.</Recruitment_Settings_IncludePermanentEnemiesDesc>
   <Recruitment_Settings_AllowChildren>Children can apply</Recruitment_Settings_AllowChildren>
   <Recruitment_Settings_AllowChildrenDesc>Only when the storyteller settings allow children.</Recruitment_Settings_AllowChildrenDesc>
+  <Recruitment_Settings_ConfirmExpensive>Ask before starting expensive drives</Recruitment_Settings_ConfirmExpensive>
+  <Recruitment_Settings_ConfirmExpensiveDesc>Shows the cost, duration and how applicants arrive before a drive that costs at least the amount below. Set the amount to 0 to always ask.</Recruitment_Settings_ConfirmExpensiveDesc>
+  <Recruitment_Settings_ConfirmThreshold>Ask from this many silver</Recruitment_Settings_ConfirmThreshold>
   <Recruitment_Settings_Applicants>Number of applicants</Recruitment_Settings_Applicants>
   <Recruitment_Settings_ApplicantWeight>{0} applicant(s): weight {1} ({2})</Recruitment_Settings_ApplicantWeight>
   <Recruitment_Settings_Methods>Cost and duration</Recruitment_Settings_Methods>

@@ -3,14 +3,18 @@
 
   <Recruitment_Caravan.label>キャラバンで募集</Recruitment_Caravan.label>
   <Recruitment_Caravan.description>来訪中の商人に、旅先で入植地のことを広めてもらいます。応募者は商人の派閥の出身で、徒歩でやって来ます。</Recruitment_Caravan.description>
+  <Recruitment_Caravan.arrivalLabel>マップの端から徒歩</Recruitment_Caravan.arrivalLabel>
 
   <Recruitment_Envoy.label>使者による募集</Recruitment_Envoy.label>
   <Recruitment_Envoy.description>入植者を使者として送り出します。使者は募集の間ずっと不在になり、応募者と一緒に戻ってきます。社交スキルが高いほど期間が短く、成功しやすくなります。</Recruitment_Envoy.description>
+  <Recruitment_Envoy.arrivalLabel>使者と一緒にマップの端から徒歩</Recruitment_Envoy.arrivalLabel>
 
   <Recruitment_Radio.label>無線放送</Recruitment_Radio.label>
   <Recruitment_Radio.description>電力の通った通信機から入植者募集を放送します。応募者は徒歩でやって来ます。宇宙からは地上に届きません。</Recruitment_Radio.description>
+  <Recruitment_Radio.arrivalLabel>マップの端から徒歩</Recruitment_Radio.arrivalLabel>
 
   <Recruitment_Orbital.label>軌道通信</Recruitment_Orbital.label>
   <Recruitment_Orbital.description>電力の通った通信機から、軌道を経由して入植者募集を呼びかけます。応募者は輸送ポッドで入植地の近くに降下します。宇宙からも使えます。</Recruitment_Orbital.description>
+  <Recruitment_Orbital.arrivalLabel>輸送ポッドで入植地の近くに降下</Recruitment_Orbital.arrivalLabel>
 
 </LanguageData>

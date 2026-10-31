@@ -40,6 +40,10 @@ namespace Recruitment
 
         public int uiOrder;
 
+        /// <summary>How applicants arrive, for the confirmation dialog (e.g. "walk in from the map edge").</summary>
+        [MustTranslate]
+        public string arrivalLabel;
+
         public bool UsesEnvoySocial => startKind == RecruitmentStartKind.Envoy;
 
         public int Cost => RecruitmentMod.Settings.CostFor(this);
@@ -66,6 +70,10 @@ namespace Recruitment
             if (startJob == null)
             {
                 yield return "startJob is not set.";
+            }
+            if (arrivalLabel.NullOrEmpty())
+            {
+                yield return "arrivalLabel is not set.";
             }
             if (arrivalModes.NullOrEmpty())
             {

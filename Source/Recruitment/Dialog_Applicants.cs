@@ -17,6 +17,9 @@ namespace Recruitment
 
         private readonly HashSet<Pawn> accepted;
 
+        // Applicants are held unspawned and do not change while waiting, so their text is built once.
+        private readonly Dictionary<Pawn, string> descriptions = new Dictionary<Pawn, string>();
+
         private Vector2 scrollPosition;
 
         public ApplicantGroup Group { get; }
@@ -94,7 +97,7 @@ namespace Recruitment
             Text.Font = GameFont.Small;
             Widgets.Label(new Rect(textRect.x, textRect.y, textRect.width, 24f), pawn.Name?.ToStringFull ?? pawn.LabelCap);
             Text.Font = GameFont.Tiny;
-            Widgets.Label(new Rect(textRect.x, textRect.y + 24f, textRect.width, textRect.height - 24f), Describe(pawn));
+            Widgets.Label(new Rect(textRect.x, textRect.y + 24f, textRect.width, textRect.height - 24f), Description(pawn));
             Text.Font = GameFont.Small;
         }
 
@@ -126,6 +129,16 @@ namespace Recruitment
                     Messages.Message(report.Reason, MessageTypeDefOf.RejectInput, historical: false);
                 }
             }
+        }
+
+        private string Description(Pawn pawn)
+        {
+            if (!descriptions.TryGetValue(pawn, out string text))
+            {
+                text = Describe(pawn);
+                descriptions[pawn] = text;
+            }
+            return text;
         }
 
         private static string Describe(Pawn pawn)

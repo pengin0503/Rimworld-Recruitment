@@ -40,6 +40,9 @@ namespace Recruitment
 
         public Pawn envoy;
 
+        /// <summary>Up to when the away envoy has been aged (see <see cref="Logic.MothballSchedule"/>).</summary>
+        public int lastAgedTick;
+
         /// <summary>Set once the player has been told that the envoy is waiting for a home to return to.</summary>
         public bool envoyWaitingNotified;
 
@@ -62,6 +65,12 @@ namespace Recruitment
             Scribe_Values.Look(ref durationTicks, "durationTicks");
             Scribe_Values.Look(ref arrivalTick, "arrivalTick", -1);
             Scribe_References.Look(ref envoy, "envoy");
+            // Saves from before aging existed have no value; aging then starts from the trip's start.
+            Scribe_Values.Look(ref lastAgedTick, "lastAgedTick", -1);
+            if (Scribe.mode == LoadSaveMode.LoadingVars && lastAgedTick < 0)
+            {
+                lastAgedTick = startTick;
+            }
             Scribe_Values.Look(ref envoyWaitingNotified, "envoyWaitingNotified");
         }
     }

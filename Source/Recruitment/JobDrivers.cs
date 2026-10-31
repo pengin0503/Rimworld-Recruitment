@@ -21,6 +21,14 @@ namespace Recruitment
         {
             this.FailOnDespawnedOrNull(TargetIndex.A);
             this.FailOn(() => !((ITrader)Trader).CanTradeNow);
+            AddFinishAction(condition =>
+            {
+                // A trader who walks off or stops trading ends the job without asking; say so instead of failing silently.
+                if (condition == JobCondition.Incompletable)
+                {
+                    Messages.Message("Recruitment_TraderLeft".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                }
+            });
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
             Toil talk = Toils_General.Wait(TalkTicks, TargetIndex.A);
             talk.WithProgressBarToilDelay(TargetIndex.A);
@@ -60,6 +68,13 @@ namespace Recruitment
         {
             this.FailOnDespawnedOrNull(TargetIndex.A);
             this.FailOn(() => !Console.CanUseCommsNow);
+            AddFinishAction(condition =>
+            {
+                if (condition == JobCondition.Incompletable)
+                {
+                    Messages.Message("Recruitment_BroadcastInterrupted".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                }
+            });
             yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.InteractionCell);
             Toil broadcast = Toils_General.Wait(BroadcastTicks, TargetIndex.A);
             broadcast.WithProgressBarToilDelay(TargetIndex.A);

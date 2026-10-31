@@ -38,10 +38,7 @@ namespace Recruitment
                 Find.LetterStack.RemoveLetter(this);
                 return;
             }
-            if (!Find.WindowStack.Windows.OfType<Dialog_Applicants>().Any(w => w.Group == group))
-            {
-                Find.WindowStack.Add(new Dialog_Applicants(group));
-            }
+            RecruitmentUI.OpenApplicants(group);
         }
 
         protected override string GetMouseoverText()

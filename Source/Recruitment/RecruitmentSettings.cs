@@ -17,6 +17,8 @@ namespace Recruitment
     {
         public const float DefaultApplicantWeight = 25f;
 
+        public const int DefaultConfirmThreshold = 200;
+
         public JoinMode joinMode = JoinMode.Choose;
 
         public int maxConcurrentPerMap = 1;
@@ -26,6 +28,11 @@ namespace Recruitment
         public bool includePermanentEnemies;
 
         public bool allowChildren;
+
+        /// <summary>Ask before starting a drive that costs at least <see cref="confirmThreshold"/> silver.</summary>
+        public bool confirmExpensive = true;
+
+        public int confirmThreshold = DefaultConfirmThreshold;
 
         /// <summary>Relative weights of getting 0, 1, 2 and 3 applicants.</summary>
         public List<float> applicantWeights = DefaultWeights();
@@ -46,6 +53,9 @@ namespace Recruitment
         public Dictionary<string, float> maxDaysOverrides = new Dictionary<string, float>();
 
         public EnvoySocialCurve EnvoyCurve => new EnvoySocialCurve(envoyDurationFactorAtZero, envoyDurationFactorPerLevel, envoyZeroChanceAtZero, envoyZeroChancePerLevel);
+
+        /// <summary>The threshold for <see cref="Logic.ConfirmationRule"/>; negative when confirmation is off.</summary>
+        public int EffectiveConfirmThreshold => confirmExpensive ? System.Math.Max(0, confirmThreshold) : -1;
 
         public int DecisionTicks => System.Math.Max(RecruitmentDuration.MinTicks, (int)(decisionHours * 2500f));
 
@@ -86,6 +96,8 @@ namespace Recruitment
             decisionHours = 24f;
             includePermanentEnemies = false;
             allowChildren = false;
+            confirmExpensive = true;
+            confirmThreshold = DefaultConfirmThreshold;
             applicantWeights = DefaultWeights();
             envoyDurationFactorAtZero = EnvoySocialCurve.Default.DurationFactorAtZero;
             envoyDurationFactorPerLevel = EnvoySocialCurve.Default.DurationFactorPerLevel;
@@ -104,6 +116,8 @@ namespace Recruitment
             Scribe_Values.Look(ref decisionHours, "decisionHours", 24f);
             Scribe_Values.Look(ref includePermanentEnemies, "includePermanentEnemies", false);
             Scribe_Values.Look(ref allowChildren, "allowChildren", false);
+            Scribe_Values.Look(ref confirmExpensive, "confirmExpensive", true);
+            Scribe_Values.Look(ref confirmThreshold, "confirmThreshold", DefaultConfirmThreshold);
             Scribe_Collections.Look(ref applicantWeights, "applicantWeights", LookMode.Value);
             Scribe_Values.Look(ref envoyDurationFactorAtZero, "envoyDurationFactorAtZero", EnvoySocialCurve.Default.DurationFactorAtZero);
             Scribe_Values.Look(ref envoyDurationFactorPerLevel, "envoyDurationFactorPerLevel", EnvoySocialCurve.Default.DurationFactorPerLevel);

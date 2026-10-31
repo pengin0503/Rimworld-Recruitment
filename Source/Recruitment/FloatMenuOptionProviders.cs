@@ -55,12 +55,12 @@ namespace Recruitment
                 yield return RecruitmentFloatMenu.Disabled(method, canStart.Reason);
                 yield break;
             }
-            yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(method), () =>
+            yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(method), () => RecruitmentUI.ConfirmThen(method, () =>
             {
                 Job job = JobMaker.MakeJob(method.startJob, clickedPawn);
                 job.playerForced = true;
                 negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-            }, MenuOptionPriority.InitiateSocial, null, clickedPawn), negotiator, clickedPawn);
+            }), MenuOptionPriority.InitiateSocial, null, clickedPawn), negotiator, clickedPawn);
         }
     }
 
@@ -110,12 +110,12 @@ namespace Recruitment
                     continue;
                 }
                 RecruitmentMethodDef chosen = method;
-                yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(chosen), () =>
+                yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(chosen), () => RecruitmentUI.ConfirmThen(chosen, () =>
                 {
                     Job job = JobMaker.MakeJob(chosen.startJob, console);
                     job.playerForced = true;
                     pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-                }, MenuOptionPriority.Default, null, console), pawn, console);
+                }), MenuOptionPriority.Default, null, console), pawn, console);
             }
         }
     }

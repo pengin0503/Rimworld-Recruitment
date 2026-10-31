@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Recruitment.Logic;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
@@ -24,6 +25,12 @@ namespace Recruitment
         private ThingOwner<Pawn> heldPawns;
 
         private int nextId = 1;
+
+        /// <summary>
+        /// Set when held pawns may have lost their drive or group (after loading, or after a pawn could not be
+        /// placed), so the orphan scan only runs when it can find something.
+        /// </summary>
+        private bool orphanCheckPending = true;
 
         public GameComponent_Recruitment(Game game)
         {
@@ -90,7 +97,7 @@ namespace Recruitment
             {
                 return "Recruitment_Reason_Silver".Translate(method.Cost, silver);
             }
-            if (needsOriginLottery && !RecruitmentUtility.EligibleOrigins(checkPermit: true).Any())
+            if (needsOriginLottery && !RecruitmentUtility.AnyEligibleOrigin(checkPermit: true))
             {
                 return "Recruitment_Reason_NoFaction".Translate();
             }
@@ -128,7 +135,7 @@ namespace Recruitment
             };
             drive.arrivalTick = now + drive.durationTicks;
             drives.Add(drive);
-            Messages.Message("Recruitment_Started".Translate(method.label, drive.durationTicks.ToStringTicksToPeriod()), starter, MessageTypeDefOf.TaskCompletion, historical: false);
+            Messages.Message("Recruitment_Started".Translate(method.LabelCap, drive.durationTicks.ToStringTicksToPeriod()), starter, MessageTypeDefOf.TaskCompletion, historical: false);
             return true;
         }
 
@@ -217,11 +224,14 @@ namespace Recruitment
                 Messages.Message("Recruitment_EnvoyStayed".Translate(pawn.Named("PAWN"), drive.paidSilver), pawn, MessageTypeDefOf.NegativeEvent, historical: false);
                 return;
             }
-            Depart(drive);
-            Messages.Message("Recruitment_EnvoyLeft".Translate(pawn.Named("PAWN"), drive.durationTicks.ToStringTicksToPeriod()), MessageTypeDefOf.NeutralEvent, historical: false);
+            if (Depart(drive))
+            {
+                Messages.Message("Recruitment_EnvoyLeft".Translate(pawn.Named("PAWN"), drive.durationTicks.ToStringTicksToPeriod()), MessageTypeDefOf.NeutralEvent, historical: false);
+            }
         }
 
-        private void Depart(RecruitmentDrive drive)
+        /// <summary>Takes the envoy off the map and starts the trip. Returns false if the trip had to be called off.</summary>
+        private bool Depart(RecruitmentDrive drive)
         {
             Pawn pawn = drive.envoy;
             pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ExitedMap);
@@ -229,12 +239,24 @@ namespace Recruitment
             {
                 pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out Thing _);
             }
+            Map map = pawn.Map;
+            IntVec3 position = pawn.Position;
             pawn.DeSpawnOrDeselect();
-            heldPawns.TryAdd(pawn);
+            if (!heldPawns.TryAdd(pawn))
+            {
+                // Never leave the envoy nowhere: put them back and call the trip off.
+                Log.Error($"[Recruitment] Could not hold envoy {pawn}; cancelling the trip.");
+                GenSpawn.Spawn(pawn, position, map);
+                drives.Remove(drive);
+                RecruitmentUtility.Refund(map, position, drive.paidSilver);
+                return false;
+            }
             int now = Find.TickManager.TicksGame;
             drive.state = DriveState.Underway;
             drive.startTick = now;
             drive.arrivalTick = now + drive.durationTicks;
+            drive.lastAgedTick = now;
+            return true;
         }
 
         // ---- Ticking ----------------------------------------------------------------------------------
@@ -242,37 +264,67 @@ namespace Recruitment
         public override void GameComponentTick()
         {
             int now = Find.TickManager.TicksGame;
+            // Deadlines are checked every tick (the list is tiny) so applicants leave exactly when their letter expires.
+            for (int i = groups.Count - 1; i >= 0; i--)
+            {
+                if (i < groups.Count && now >= groups[i].deadlineTick)
+                {
+                    Decide(groups[i], new List<Pawn>(), expired: true);
+                }
+            }
             if (now % CheckInterval != 0)
             {
                 return;
             }
-            // While a gravship is in flight the colony has no map to arrive at yet; wait for it to land.
-            bool gravshipInFlight = Find.CurrentGravship != null;
-            foreach (RecruitmentDrive drive in drives.ToList())
+            // Backwards by index: Arrive and CheckDepartingEnvoy may remove the current drive, and this avoids
+            // copying the list every check.
+            for (int i = drives.Count - 1; i >= 0; i--)
             {
+                if (i >= drives.Count)
+                {
+                    continue;
+                }
+                RecruitmentDrive drive = drives[i];
                 if (drive.state == DriveState.EnvoyDeparting)
                 {
                     CheckDepartingEnvoy(drive);
+                    continue;
                 }
-                else if (now >= drive.arrivalTick && !gravshipInFlight)
+                AgeAwayEnvoy(drive, now);
+                if (now >= drive.arrivalTick)
                 {
                     Arrive(drive);
                 }
             }
-            foreach (ApplicantGroup group in groups.ToList())
+            if (orphanCheckPending)
             {
-                if (now >= group.deadlineTick)
+                orphanCheckPending = false;
+                RecoverOrphans();
+            }
+        }
+
+        /// <summary>Whether the envoy is still on their way out: doing the departure job, or about to (queued behind another job).</summary>
+        private static bool IsWalkingOut(Pawn pawn, JobDef departJob)
+        {
+            if (pawn.CurJobDef == departJob)
+            {
+                return true;
+            }
+            foreach (QueuedJob queued in pawn.jobs.jobQueue)
+            {
+                if (queued.job?.def == departJob)
                 {
-                    Decide(group, new List<Pawn>(), expired: true);
+                    return true;
                 }
             }
+            return false;
         }
 
         /// <summary>Cancels and refunds an envoy drive whose envoy stopped walking out before leaving.</summary>
         private void CheckDepartingEnvoy(RecruitmentDrive drive)
         {
             Pawn pawn = drive.envoy;
-            if (pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.Spawned && pawn.CurJobDef == drive.method.startJob)
+            if (pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.Spawned && IsWalkingOut(pawn, drive.method.startJob))
             {
                 return;
             }
@@ -282,15 +334,129 @@ namespace Recruitment
             Messages.Message("Recruitment_EnvoyCancelled".Translate(pawn?.LabelShort ?? "?", drive.paidSilver), onMap ? pawn : LookTargets.Invalid, MessageTypeDefOf.NegativeEvent, historical: false);
         }
 
+        /// <summary>Ages an away envoy the way the game ages idle world pawns, in whole mothball intervals.</summary>
+        private void AgeAwayEnvoy(RecruitmentDrive drive, int now)
+        {
+            Pawn envoy = drive.envoy;
+            if (envoy == null || !heldPawns.Contains(envoy))
+            {
+                return;
+            }
+            int due = MothballSchedule.DueTicks(drive.lastAgedTick, now, MothballSchedule.Interval);
+            for (int ticks = 0; ticks < due; ticks += MothballSchedule.Interval)
+            {
+                envoy.TickMothballed(MothballSchedule.Interval);
+            }
+            drive.lastAgedTick += due;
+        }
+
+        /// <summary>
+        /// Held pawns that no drive or group refers to any more (e.g. after a def went missing on load, or after
+        /// an arrival that failed) would otherwise be lost: colonists are brought home, others are discarded.
+        /// </summary>
+        private void RecoverOrphans()
+        {
+            if (heldPawns.Count == 0)
+            {
+                return;
+            }
+            var referenced = new HashSet<Pawn>();
+            foreach (RecruitmentDrive drive in drives)
+            {
+                if (drive.envoy != null)
+                {
+                    referenced.Add(drive.envoy);
+                }
+            }
+            foreach (ApplicantGroup group in groups)
+            {
+                referenced.UnionWith(group.pawns);
+            }
+            foreach (Pawn pawn in heldPawns.InnerListForReading.ToList())
+            {
+                if (referenced.Contains(pawn))
+                {
+                    continue;
+                }
+                if (pawn.Faction == Faction.OfPlayer && !pawn.Dead)
+                {
+                    Map home = Find.AnyPlayerHomeMap;
+                    if (home == null)
+                    {
+                        // No colony to go to yet; look again on a later check.
+                        orphanCheckPending = true;
+                        continue;
+                    }
+                    Log.WarningOnce($"[Recruitment] Bringing back {pawn}, who was held without a recruitment drive.", pawn.thingIDNumber ^ 0x4F525048);
+                    heldPawns.Remove(pawn);
+                    BringHome(new List<Pawn> { pawn }, home, RecruitmentDefOf.Recruitment_Envoy);
+                }
+                else
+                {
+                    heldPawns.Remove(pawn);
+                    Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Puts pawns taken out of <see cref="heldPawns"/> onto <paramref name="map"/>. Whatever goes wrong, every
+        /// pawn ends up either spawned or back in <see cref="heldPawns"/> (and then recovered later), never nowhere.
+        /// </summary>
+        private void BringHome(List<Pawn> pawns, Map map, RecruitmentMethodDef method)
+        {
+            if (pawns.Count == 0)
+            {
+                return;
+            }
+            foreach (Pawn pawn in pawns)
+            {
+                if (pawn.Faction == Faction.OfPlayer)
+                {
+                    RecruitmentUtility.Notify_BackFromAway(pawn);
+                }
+            }
+            try
+            {
+                RecruitmentUtility.Arrive(pawns, map, method);
+            }
+            catch (System.Exception e)
+            {
+                Log.ErrorOnce($"[Recruitment] Arrival on {map} failed; placing the pawns directly. {e}", pawns[0].thingIDNumber ^ 0x41525256);
+            }
+            foreach (Pawn pawn in pawns)
+            {
+                if (pawn.Spawned || pawn.Destroyed || pawn.holdingOwner != null)
+                {
+                    continue;
+                }
+                try
+                {
+                    GenPlace.TryPlaceThing(pawn, DropCellFinder.TradeDropSpot(map), map, ThingPlaceMode.Near);
+                }
+                catch (System.Exception e)
+                {
+                    // Retried every check while it keeps failing, so report it once per pawn.
+                    Log.ErrorOnce($"[Recruitment] Could not place {pawn}; keeping them to try again later. {e}", pawn.thingIDNumber ^ 0x52454352);
+                }
+                if (!pawn.Spawned && !pawn.Destroyed && pawn.holdingOwner == null)
+                {
+                    heldPawns.TryAdd(pawn);
+                    orphanCheckPending = true;
+                }
+            }
+        }
+
         private void Arrive(RecruitmentDrive drive)
         {
             Map dest = RecruitmentUtility.ResolveDestination(drive.method, drive.map);
             if (dest == null)
             {
-                if (drive.envoy != null)
+                // A gravship in flight has no map yet, and an envoy needs a home to come back to: both wait.
+                bool gravshipInFlight = Find.CurrentGravship != null;
+                if (drive.envoy != null || gravshipInFlight)
                 {
-                    // An envoy keeps waiting until there is a home to come back to.
-                    if (!drive.envoyWaitingNotified)
+                    if (drive.envoy != null && !drive.envoyWaitingNotified && !gravshipInFlight)
                     {
                         drive.envoyWaitingNotified = true;
                         Messages.Message("Recruitment_EnvoyWaiting".Translate(drive.envoy.Named("PAWN")), MessageTypeDefOf.NeutralEvent);
@@ -307,6 +473,7 @@ namespace Recruitment
             if (drive.envoy != null && heldPawns.Contains(drive.envoy))
             {
                 heldPawns.Remove(drive.envoy);
+                drive.envoy.TickMothballed(MothballSchedule.RemainderTicks(drive.lastAgedTick, Find.TickManager.TicksGame));
                 returning.Add(drive.envoy);
             }
 
@@ -329,7 +496,7 @@ namespace Recruitment
 
             if (applicants.Count == 0)
             {
-                RecruitmentUtility.Arrive(returning, dest, drive.method);
+                BringHome(returning, dest, drive.method);
                 TaggedString text = "Recruitment_LetterNoApplicants".Translate(drive.method.label);
                 if (returning.Count > 0)
                 {
@@ -345,14 +512,14 @@ namespace Recruitment
                 {
                     pawn.SetFaction(Faction.OfPlayer);
                 }
-                RecruitmentUtility.Arrive(returning.Concat(applicants).ToList(), dest, drive.method);
+                BringHome(returning.Concat(applicants).ToList(), dest, drive.method);
                 SendJoinedLetter(applicants, drive.method, returning.FirstOrDefault());
                 return;
             }
 
             if (returning.Count > 0)
             {
-                RecruitmentUtility.Arrive(returning, dest, drive.method);
+                BringHome(returning, dest, drive.method);
                 Messages.Message("Recruitment_EnvoyReturned".Translate(returning[0].Named("PAWN")), returning[0], MessageTypeDefOf.PositiveEvent);
             }
             foreach (Pawn pawn in applicants)
@@ -379,7 +546,8 @@ namespace Recruitment
             {
                 return drive.origin;
             }
-            return RecruitmentUtility.EligibleOrigins(checkPermit: false).RandomElementWithFallback();
+            // A newly drawn faction is a new choice, so it must pass the permit check like at the start.
+            return RecruitmentUtility.EligibleOrigins(checkPermit: true).RandomElementWithFallback();
         }
 
         // ---- Decisions --------------------------------------------------------------------------------
@@ -424,7 +592,7 @@ namespace Recruitment
             }
             if (joining.Count > 0)
             {
-                RecruitmentUtility.Arrive(joining, dest, group.method);
+                BringHome(joining, dest, group.method);
                 SendJoinedLetter(joining, group.method, null);
             }
 
@@ -457,11 +625,10 @@ namespace Recruitment
         {
             if (drive.state == DriveState.EnvoyDeparting)
             {
-                if (drive.envoy == null || !drive.envoy.Spawned)
+                if (drive.envoy == null || !drive.envoy.Spawned || !Depart(drive))
                 {
                     return;
                 }
-                Depart(drive);
             }
             Arrive(drive);
         }
