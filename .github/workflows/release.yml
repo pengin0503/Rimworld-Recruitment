@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # Manual run: the release (and its tag) is created from the selected commit.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to create, e.g. v1.0.0'
+        required: true
 
 permissions:
   contents: write
@@ -10,6 +16,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.version || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,12 +35,14 @@ jobs:
         run: |
           mkdir -p "dist/ColonistRecruitment"
           cp -r About 1.7 Defs Languages Patches Textures "dist/ColonistRecruitment/"
-          (cd dist && zip -r "ColonistRecruitment-${GITHUB_REF_NAME}.zip" ColonistRecruitment)
+          (cd dist && zip -r "ColonistRecruitment-${TAG}.zip" ColonistRecruitment)
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: Colonist Recruitment ${{ github.ref_name }}
-          files: dist/ColonistRecruitment-${{ github.ref_name }}.zip
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Colonist Recruitment ${{ env.TAG }}
+          files: dist/ColonistRecruitment-${{ env.TAG }}.zip
           body: |
             RimWorld 1.7 用。前提MOD: Harmony（brrainz.harmony）。
             zip を展開した `ColonistRecruitment` フォルダーを `RimWorld/Mods/` に置き、MOD 一覧で Harmony の下で有効にしてください。
