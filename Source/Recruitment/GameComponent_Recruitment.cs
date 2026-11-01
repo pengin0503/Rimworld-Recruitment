@@ -75,8 +75,11 @@ namespace Recruitment
 
         // ---- Starting from the colony -----------------------------------------------------------------
 
-        /// <summary>Checks everything about starting <paramref name="method"/> on <paramref name="map"/> except who starts it.</summary>
-        public AcceptanceReport CanStart(RecruitmentMethodDef method, Map map, bool needsOriginLottery)
+        /// <summary>
+        /// Checks everything about starting <paramref name="method"/> on <paramref name="map"/> with
+        /// <paramref name="premiumTier"/> except who starts it.
+        /// </summary>
+        public AcceptanceReport CanStart(RecruitmentMethodDef method, Map map, bool needsOriginLottery, int premiumTier = 0)
         {
             if (map == null)
             {
@@ -87,10 +90,11 @@ namespace Recruitment
             {
                 return common;
             }
+            int cost = PremiumTier.TotalCost(method.Cost, premiumTier);
             int silver = RecruitmentUtility.CountSpendableSilver(map);
-            if (silver < method.Cost)
+            if (silver < cost)
             {
-                return "Recruitment_Reason_Silver".Translate(method.Cost, silver);
+                return "Recruitment_Reason_Silver".Translate(cost, silver);
             }
             if (needsOriginLottery && !RecruitmentUtility.AnyEligibleOrigin(checkPermit: true))
             {
@@ -118,28 +122,44 @@ namespace Recruitment
             return true;
         }
 
-        /// <summary>Starts a trader or comms drive. <paramref name="fixedOrigin"/> is the trader's faction, or null to draw one.</summary>
-        public bool TryStart(RecruitmentMethodDef method, Map map, Faction fixedOrigin, Pawn starter)
+        /// <summary>
+        /// Starts a trader or comms drive. <paramref name="fixedOrigin"/> is the trader's faction (or the faction
+        /// asked directly), or null to draw one. With <paramref name="direct"/>, the request goes to
+        /// <paramref name="fixedOrigin"/> itself and also costs goodwill.
+        /// </summary>
+        public bool TryStart(RecruitmentMethodDef method, Map map, Faction fixedOrigin, Pawn starter, int premiumTier, bool direct = false)
         {
-            AcceptanceReport report = CanStart(method, map, fixedOrigin == null);
+            premiumTier = PremiumTier.Clamp(premiumTier);
+            AcceptanceReport report = direct ? CanRequestDirect(method, map, fixedOrigin, premiumTier) : CanStart(method, map, fixedOrigin == null, premiumTier);
             if (!report.Accepted)
             {
                 RejectMessage(report, starter);
                 return false;
             }
             Faction origin = fixedOrigin ?? RecruitmentUtility.EligibleOrigins(checkPermit: true).RandomElement();
-            int cost = method.Cost;
+            int cost = PremiumTier.TotalCost(method.Cost, premiumTier);
             if (!RecruitmentUtility.TryPay(map, cost))
             {
                 RejectMessage("Recruitment_Reason_Silver".Translate(cost, RecruitmentUtility.CountSpendableSilver(map)), starter);
                 return false;
             }
-            RecruitmentDrive drive = AddDrive(method, map, origin, cost, social: 0);
-            Messages.Message("Recruitment_Started".Translate(method.LabelCap, drive.durationTicks.ToStringTicksToPeriod()), starter, MessageTypeDefOf.TaskCompletion, historical: false);
+            int goodwill = 0;
+            if (direct)
+            {
+                goodwill = RecruitmentUtility.DirectGoodwillCost(origin);
+                Faction.OfPlayer.TryAffectGoodwillWith(origin, -DirectRequestRule.GoodwillCost, canSendMessage: false, canSendHostilityLetter: true, RecruitmentDefOf.Recruitment_RequestedSettlers);
+            }
+            int social = RecruitmentUtility.SocialLevel(starter);
+            RecruitmentDrive drive = AddDrive(method, map, origin, cost, social, premiumTier, direct);
+            string period = drive.durationTicks.ToStringTicksToPeriod();
+            TaggedString text = direct
+                ? "Recruitment_StartedDirect".Translate(origin.Name, method.label, goodwill, period)
+                : "Recruitment_Started".Translate(method.LabelCap, period);
+            Messages.Message(text, starter, MessageTypeDefOf.TaskCompletion, historical: false);
             return true;
         }
 
-        private RecruitmentDrive AddDrive(RecruitmentMethodDef method, Map map, Faction origin, int paid, int social)
+        private RecruitmentDrive AddDrive(RecruitmentMethodDef method, Map map, Faction origin, int paid, int social, int premiumTier, bool direct = false)
         {
             int now = Find.TickManager.TicksGame;
             var drive = new RecruitmentDrive
@@ -149,8 +169,11 @@ namespace Recruitment
                 state = DriveState.Underway,
                 map = map,
                 origin = origin,
-                applicantCount = RecruitmentUtility.RollApplicantCount(method, social),
+                applicantCount = RecruitmentUtility.RollApplicantCount(social),
                 paidSilver = paid,
+                premiumTier = premiumTier,
+                direct = direct,
+                starterSocial = social,
                 plannedMapName = MapName(map),
                 startTick = now,
                 durationTicks = RecruitmentUtility.RollDurationTicks(method),
@@ -158,6 +181,68 @@ namespace Recruitment
             drive.arrivalTick = now + drive.durationTicks;
             drives.Add(drive);
             return drive;
+        }
+
+        // ---- Direct requests (asking a faction over the comms console) ----------------------------------
+
+        /// <summary>Whether a direct request to <paramref name="faction"/> is still waiting for its result.</summary>
+        public bool HasPendingDirectRequest(Faction faction)
+        {
+            for (int i = 0; i < drives.Count; i++)
+            {
+                if (drives[i].direct && drives[i].origin == faction)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// The faction-side conditions of a direct request: it can send settlers (the Empire needs a colonist with
+        /// the trade permit), is not hostile, keeps goodwill at 0 or above after paying, and has no earlier
+        /// request still waiting. A rejection without a reason means the faction is never offered.
+        /// </summary>
+        public AcceptanceReport CanAskFaction(Faction faction)
+        {
+            if (!RecruitmentUtility.IsDirectRequestCandidate(faction))
+            {
+                return false;
+            }
+            int goodwillCost = RecruitmentUtility.DirectGoodwillCost(faction);
+            switch (DirectRequestRule.Check(faction.HostileTo(Faction.OfPlayer), faction.PlayerGoodwill, goodwillCost, HasPendingDirectRequest(faction)))
+            {
+                case DirectRequestBlock.Hostile:
+                    return "Recruitment_Reason_FactionHostile".Translate();
+                case DirectRequestBlock.Goodwill:
+                    return "Recruitment_Reason_Goodwill".Translate(goodwillCost, faction.PlayerGoodwill);
+                case DirectRequestBlock.Pending:
+                    return "Recruitment_Reason_DirectPending".Translate();
+            }
+            if (!RecruitmentUtility.IsEligibleOrigin(faction, checkPermit: false))
+            {
+                return "Recruitment_Reason_SettlementUnwilling".Translate(faction.Name);
+            }
+            if (!RecruitmentUtility.IsEligibleOrigin(faction, checkPermit: true))
+            {
+                return "Recruitment_Reason_NeedsPermit".Translate(faction.Name);
+            }
+            if (!Faction.OfPlayer.CanChangeGoodwillFor(faction, -goodwillCost))
+            {
+                return "Recruitment_Reason_GoodwillLocked".Translate();
+            }
+            return true;
+        }
+
+        /// <summary>Everything about asking <paramref name="faction"/> for settlers with <paramref name="method"/>.</summary>
+        public AcceptanceReport CanRequestDirect(RecruitmentMethodDef method, Map map, Faction faction, int premiumTier)
+        {
+            AcceptanceReport target = CanAskFaction(faction);
+            if (!target.Accepted)
+            {
+                return target;
+            }
+            return CanStart(method, map, needsOriginLottery: false, premiumTier);
         }
 
         // ---- Envoys (caravans visiting settlements) ---------------------------------------------------
@@ -168,11 +253,56 @@ namespace Recruitment
             return CooldownRule.TicksRemaining(last, Find.TickManager.TicksGame, RecruitmentMod.Settings.EnvoyCooldownTicks);
         }
 
+        /// <summary>Settlements of <paramref name="faction"/> that cannot be asked again yet, with the ticks left.</summary>
+        public List<(Settlement settlement, int ticks)> SettlementsOnCooldown(Faction faction)
+        {
+            var result = new List<(Settlement, int)>();
+            if (settlementRequests.Count == 0)
+            {
+                return result;
+            }
+            foreach (Settlement settlement in Find.WorldObjects.Settlements)
+            {
+                if (settlement.Faction == faction && settlementRequests.ContainsKey(settlement.ID))
+                {
+                    int ticks = CooldownTicksRemaining(settlement);
+                    if (ticks > 0)
+                    {
+                        result.Add((settlement, ticks));
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="method"/> could be used from <paramref name="map"/> right now, for the tab's
+        /// overview. The trader needs a visiting trader and the envoy a caravan, so for them only what the colony
+        /// controls is checked; the comms methods are checked in full.
+        /// </summary>
+        public AcceptanceReport Availability(RecruitmentMethodDef method, Map map)
+        {
+            if (method.startKind == RecruitmentStartKind.Envoy)
+            {
+                if (!method.ResearchFinished)
+                {
+                    return CanStartCommon(method, map);
+                }
+                return RecruitmentUtility.ResolveStartDestination(method) != null ? (AcceptanceReport)true : "Recruitment_Reason_NoDestination".Translate();
+            }
+            if (map == null || !map.IsPlayerHome)
+            {
+                return "Recruitment_Reason_NotColonyMap".Translate();
+            }
+            return CanStart(method, map, needsOriginLottery: method.startKind == RecruitmentStartKind.CommsConsole);
+        }
+
         /// <summary>
         /// Whether <paramref name="caravan"/> can ask <paramref name="settlement"/> to send settlers. With
-        /// <paramref name="checkSilver"/> false the caravan's silver is ignored (used for the departure warning).
+        /// <paramref name="checkSilver"/> false the caravan's silver is ignored (used for the departure warning);
+        /// otherwise it must cover the cost with <paramref name="premiumTier"/>.
         /// </summary>
-        public AcceptanceReport CanRequestAt(Caravan caravan, Settlement settlement, bool checkSilver, Map chosenMap = null, bool destinationSelected = false)
+        public AcceptanceReport CanRequestAt(Caravan caravan, Settlement settlement, bool checkSilver, Map chosenMap = null, bool destinationSelected = false, int premiumTier = 0)
         {
             RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Envoy;
             AcceptanceReport target = CanAskSettlement(settlement);
@@ -208,10 +338,11 @@ namespace Recruitment
             }
             if (checkSilver && caravan != null)
             {
+                int cost = PremiumTier.TotalCost(method.Cost, premiumTier);
                 int silver = RecruitmentUtility.CountCaravanSilver(caravan);
-                if (silver < method.Cost)
+                if (silver < cost)
                 {
-                    return "Recruitment_Reason_CaravanSilver".Translate(method.Cost, silver);
+                    return "Recruitment_Reason_CaravanSilver".Translate(cost, silver);
                 }
             }
             return true;
@@ -243,9 +374,10 @@ namespace Recruitment
         }
 
         /// <summary>Called when an envoy caravan arrives at (or is already visiting) a settlement and asks for settlers.</summary>
-        public bool TryRequestAt(Caravan caravan, Settlement settlement, Map chosenMap = null, bool destinationSelected = false)
+        public bool TryRequestAt(Caravan caravan, Settlement settlement, Map chosenMap = null, bool destinationSelected = false, int premiumTier = 0)
         {
-            AcceptanceReport report = CanRequestAt(caravan, settlement, checkSilver: true, chosenMap, destinationSelected);
+            premiumTier = PremiumTier.Clamp(premiumTier);
+            AcceptanceReport report = CanRequestAt(caravan, settlement, checkSilver: true, chosenMap, destinationSelected, premiumTier);
             if (!report.Accepted)
             {
                 if (!report.Reason.NullOrEmpty())
@@ -255,7 +387,7 @@ namespace Recruitment
                 return false;
             }
             RecruitmentMethodDef method = RecruitmentDefOf.Recruitment_Envoy;
-            int cost = method.Cost;
+            int cost = PremiumTier.TotalCost(method.Cost, premiumTier);
             if (!RecruitmentUtility.TryPayFromCaravan(caravan, cost))
             {
                 Messages.Message("Recruitment_Reason_CaravanSilver".Translate(cost, RecruitmentUtility.CountCaravanSilver(caravan)), caravan, MessageTypeDefOf.RejectInput, historical: false);
@@ -263,7 +395,7 @@ namespace Recruitment
             }
             Pawn negotiator = BestCaravanPawnUtility.FindBestNegotiator(caravan, settlement.Faction, settlement.TraderKind);
             Map destination = destinationSelected ? chosenMap : RecruitmentUtility.ResolveStartDestination(method);
-            RecruitmentDrive drive = AddDrive(method, destination, settlement.Faction, cost, RecruitmentUtility.SocialLevel(negotiator));
+            RecruitmentDrive drive = AddDrive(method, destination, settlement.Faction, cost, RecruitmentUtility.SocialLevel(negotiator), premiumTier);
             settlementRequests[settlement.ID] = Find.TickManager.TicksGame;
             Messages.Message("Recruitment_EnvoyRequested".Translate(negotiator.Named("PAWN"), settlement.Label, drive.durationTicks.ToStringTicksToPeriod()), caravan, MessageTypeDefOf.TaskCompletion, historical: false);
             return true;
@@ -429,10 +561,11 @@ namespace Recruitment
             groups.Add(group);
             drives.Remove(drive);
             List<Pawn> applicants = group.pawns;
+            int candidates = PremiumTier.Candidates(drive.premiumTier);
             for (int i = 0; i < drive.applicantCount; i++)
             {
-                // Generation failures are logged and skipped.
-                Pawn pawn = RecruitmentUtility.TryGenerateApplicant(origin, dest);
+                // Generation failures are logged and skipped. With a premium, the best of several candidates comes.
+                Pawn pawn = RecruitmentUtility.TryGenerateBestApplicant(origin, dest, candidates);
                 if (pawn == null)
                 {
                     group.historyEntry.generationFailures++;

@@ -50,11 +50,12 @@ namespace Recruitment
                 () => ToFloatMenuReport(component.CanRequestAt(caravan, settlement, checkSilver: true)),
                 () => arrival,
                 label, caravan, settlement.Tile, settlement,
-                confirmActionProxy: go => RecruitmentUI.ChooseDestination(map =>
+                confirmActionProxy: go => RecruitmentUI.ChooseDestination(map => RecruitmentUI.OpenForEnvoy(caravan, settlement, map, payOnArrival: true, tier =>
                 {
                     arrival.SetDestination(map);
-                    RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, go);
-                })))
+                    arrival.SetPremium(tier);
+                    go();
+                }))))
             {
                 yield return option;
             }
@@ -73,7 +74,8 @@ namespace Recruitment
                 defaultLabel = "Recruitment_Command_Request".Translate(),
                 defaultDesc = "Recruitment_Command_RequestDesc".Translate(RecruitmentFloatMenu.OptionLabel(RecruitmentDefOf.Recruitment_Envoy)),
                 icon = RequestIcon,
-                action = () => RecruitmentUI.ChooseDestination(map => RecruitmentUI.ConfirmThen(RecruitmentDefOf.Recruitment_Envoy, () => component.TryRequestAt(caravan, settlement, map, destinationSelected: true))),
+                action = () => RecruitmentUI.ChooseDestination(map => RecruitmentUI.OpenForEnvoy(caravan, settlement, map, payOnArrival: false,
+                    tier => component.TryRequestAt(caravan, settlement, map, destinationSelected: true, tier))),
             };
             AcceptanceReport report = GizmoReports.Get((caravan.ID, settlement.ID), () => component.CanRequestAt(caravan, settlement, checkSilver: true));
             if (!report.Accepted)
@@ -110,11 +112,21 @@ namespace Recruitment
 
         private bool destinationSelected;
 
+        private int premiumTier;
+
         public void SetDestination(Map map)
         {
             destination = map;
             destinationSelected = true;
         }
+
+        public void SetPremium(int tier)
+        {
+            premiumTier = PremiumTier.Clamp(tier);
+        }
+
+        /// <summary>The silver the request will cost on arrival, premium included.</summary>
+        public int Cost => PremiumTier.TotalCost(RecruitmentDefOf.Recruitment_Envoy.Cost, premiumTier);
 
         public CaravanArrivalAction_RequestRecruitment()
         {
@@ -152,7 +164,7 @@ namespace Recruitment
 
         public override void Arrived(Caravan caravan)
         {
-            GameComponent_Recruitment.Instance?.TryRequestAt(caravan, settlement, destination, destinationSelected);
+            GameComponent_Recruitment.Instance?.TryRequestAt(caravan, settlement, destination, destinationSelected, premiumTier);
         }
 
         public override void ExposeData()
@@ -162,6 +174,7 @@ namespace Recruitment
             if (Scribe.mode == LoadSaveMode.Saving && destination != null && !Find.Maps.Contains(destination)) destination = null;
             Scribe_References.Look(ref destination, "destination");
             Scribe_Values.Look(ref destinationSelected, "destinationSelected");
+            Scribe_Values.Look(ref premiumTier, "premiumTier");
         }
     }
 }

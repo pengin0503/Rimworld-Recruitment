@@ -18,6 +18,8 @@ LANGUAGES = ["English", "Japanese"]
 DYNAMIC_KEYS = {
     "Recruitment_JoinMode_": ["Choose", "AutoJoin"],
     "Recruitment_Tab_HowTo_": ["Trader", "Envoy", "CommsConsole"],
+    # Dialog_StartRecruitment.TierKey
+    "Recruitment_Premium_": ["None", "Some", "More", "Max"],
 }
 
 # Quoted strings that look like keys but are not translated (e.g. save IDs).
@@ -172,6 +174,11 @@ def check_defs(data_path):
                 error(f"{name}: startJob {job} is not a JobDef in Defs/")
             if not node.findall("arrivalModes/li"):
                 error(f"{name}: arrivalModes is empty")
+            icon = node.findtext("iconPath")
+            if not icon:
+                error(f"{name}: iconPath is not set")
+            elif not (ROOT / "Textures" / (icon + ".png")).exists():
+                error(f"{name}: texture Textures/{icon}.png does not exist")
             for field in ("label", "description", "arrivalLabel"):
                 if not node.findtext(field):
                     error(f"{name}: {field} is not set")

@@ -46,33 +46,6 @@ namespace Recruitment.Logic
             return last;
         }
 
-        /// <summary>
-        /// Builds probabilities where the chance of no applicants is fixed to <paramref name="zeroChance"/>
-        /// and the rest is shared by 1..MaxApplicants in proportion to <paramref name="weights"/>.
-        /// </summary>
-        public static float[] WithZeroChance(IReadOnlyList<float> weights, float zeroChance)
-        {
-            CheckLength(weights);
-            float p0 = Math.Clamp(zeroChance, 0f, 1f);
-            float positiveTotal = 0f;
-            for (int i = 1; i < OutcomeCount; i++)
-            {
-                positiveTotal += Math.Max(0f, weights[i]);
-            }
-            var result = new float[OutcomeCount];
-            if (positiveTotal <= 0f)
-            {
-                result[0] = 1f;
-                return result;
-            }
-            result[0] = p0;
-            for (int i = 1; i < OutcomeCount; i++)
-            {
-                result[i] = (1f - p0) * Math.Max(0f, weights[i]) / positiveTotal;
-            }
-            return result;
-        }
-
         private static void CheckLength(IReadOnlyList<float> weights)
         {
             if (weights == null || weights.Count != OutcomeCount)

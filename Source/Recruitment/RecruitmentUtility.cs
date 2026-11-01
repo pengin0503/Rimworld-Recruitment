@@ -236,6 +236,22 @@ namespace Recruitment
             return Find.FactionManager.AllFactionsListForReading.Where(f => IsEligibleOrigin(f, checkPermit)).ToList();
         }
 
+        /// <summary>
+        /// The goodwill a direct request to <paramref name="faction"/> actually costs: the fixed
+        /// <see cref="DirectRequestRule.GoodwillCost"/>, after the game's own adjustment (a loss is up to 25%
+        /// larger while goodwill is above the faction's natural level, as for requesting a trade caravan).
+        /// </summary>
+        public static int DirectGoodwillCost(Faction faction)
+        {
+            return -Faction.OfPlayer.CalculateAdjustedGoodwillChange(faction, -DirectRequestRule.GoodwillCost);
+        }
+
+        /// <summary>Factions that could ever be asked directly: visible, humanlike, not the player's.</summary>
+        public static bool IsDirectRequestCandidate(Faction faction)
+        {
+            return faction != null && !faction.IsPlayer && !faction.Hidden && !faction.temporary && !faction.defeated && !faction.deactivated && faction.def.humanlikeFaction;
+        }
+
         /// <summary>The royal permits this faction's caravan traders require (the Empire's need Knight or above).</summary>
         private static List<RoyalTitlePermitDef> TradePermits(Faction faction)
         {
@@ -297,15 +313,10 @@ namespace Recruitment
 
         // ---- Applicants ---------------------------------------------------------------------------------
 
-        public static int RollApplicantCount(RecruitmentMethodDef method, int envoySocial)
+        /// <summary>Rolls 0..3 applicants; the starting colonist's Social skill shifts the chances (every method).</summary>
+        public static int RollApplicantCount(int social)
         {
-            List<float> weights = RecruitmentMod.Settings.applicantWeights;
-            if (method.UsesEnvoySocial)
-            {
-                float zeroChance = RecruitmentMod.Settings.EnvoyCurve.ZeroChance(envoySocial);
-                return ApplicantRoll.Roll(ApplicantRoll.WithZeroChance(weights, zeroChance), Rand.Value);
-            }
-            return ApplicantRoll.Roll(weights, Rand.Value);
+            return ApplicantRoll.Roll(RecruitmentMod.Settings.ApplicantChances(social), Rand.Value);
         }
 
         public static int RollDurationTicks(RecruitmentMethodDef method)
@@ -341,6 +352,84 @@ namespace Recruitment
                 Log.Error($"[Recruitment] Could not generate a factionless applicant either: {e}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Generates <paramref name="candidates"/> applicants and keeps the one with the best
+        /// <see cref="ApplicantScore"/>; the others are discarded. Pawns are never altered. Returns null if every
+        /// candidate failed to generate.
+        /// </summary>
+        public static Pawn TryGenerateBestApplicant(Faction faction, Map map, int candidates)
+        {
+            if (candidates <= 1)
+            {
+                return TryGenerateApplicant(faction, map);
+            }
+            ScoreWeights weights = RecruitmentMod.Settings.Score;
+            var pawns = new List<Pawn>(candidates);
+            var scores = new List<float>(candidates);
+            for (int i = 0; i < candidates; i++)
+            {
+                Pawn candidate = TryGenerateApplicant(faction, map);
+                if (candidate != null)
+                {
+                    pawns.Add(candidate);
+                    scores.Add(ApplicantScore.Score(FactsOf(candidate), weights));
+                }
+            }
+            int best = ApplicantScore.Best(scores);
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                if (i != best)
+                {
+                    DiscardCandidate(pawns[i]);
+                }
+            }
+            return best < 0 ? null : pawns[best];
+        }
+
+        private static void DiscardCandidate(Pawn pawn)
+        {
+            try
+            {
+                if (pawn.IsWorldPawn())
+                {
+                    Find.WorldPawns.RemovePawn(pawn);
+                }
+                // The same path as a rejected applicant: destroys the pawn and clears its relations.
+                Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
+            }
+            catch (System.Exception e)
+            {
+                Log.Error($"[Recruitment] Could not discard the unused candidate {pawn}: {e}");
+            }
+        }
+
+        public static ApplicantFacts FactsOf(Pawn pawn)
+        {
+            var levels = new List<int>();
+            var passions = new List<int>();
+            if (pawn.skills != null)
+            {
+                foreach (SkillRecord skill in pawn.skills.skills)
+                {
+                    levels.Add(skill.TotallyDisabled ? 0 : skill.Level);
+                    passions.Add(skill.TotallyDisabled ? 0 : (int)skill.passion);
+                }
+            }
+            return new ApplicantFacts(levels, passions, DisabledWorkTypes(pawn).Count(), HealthProblems(pawn).Count());
+        }
+
+        /// <summary>Work types the pawn cannot do, as listed in the applicant dialog and counted by the score.</summary>
+        public static IEnumerable<WorkTypeDef> DisabledWorkTypes(Pawn pawn)
+        {
+            return DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(w => w.visible && pawn.WorkTypeIsDisabled(w));
+        }
+
+        /// <summary>Visible bad hediffs: what the applicant dialog lists as health problems and the score counts.</summary>
+        public static IEnumerable<Hediff> HealthProblems(Pawn pawn)
+        {
+            return pawn.health.hediffSet.hediffs.Where(h => h.Visible && h.def.isBad);
         }
 
         /// <summary>Generates an applicant as an ordinary member of <paramref name="faction"/> (or a factionless wanderer).</summary>

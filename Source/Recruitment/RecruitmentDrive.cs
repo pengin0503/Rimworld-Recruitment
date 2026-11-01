@@ -30,7 +30,20 @@ namespace Recruitment
         /// <summary>Fixed when the drive starts and kept secret from the player.</summary>
         public int applicantCount;
 
+        /// <summary>Everything paid in silver, premium included.</summary>
         public int paidSilver;
+
+        /// <summary>The silver premium (<see cref="Logic.PremiumTier"/>); 0 for none and for drives from 1.0.</summary>
+        public int premiumTier;
+
+        /// <summary>
+        /// A request made to <see cref="origin"/> itself over the comms console (it cost goodwill). Only one such
+        /// request per faction can wait for its result at a time.
+        /// </summary>
+        public bool direct;
+
+        /// <summary>Social skill of the colonist who started the drive, for display.</summary>
+        public int starterSocial = -1;
 
         public string plannedMapName;
 
@@ -45,6 +58,9 @@ namespace Recruitment
 
         public int TicksUntilArrival => arrivalTick - Find.TickManager.TicksGame;
 
+        /// <summary>How far the drive has come, 0..1.</summary>
+        public float Progress => durationTicks <= 0 ? 1f : UnityEngine.Mathf.Clamp01(1f - (float)TicksUntilArrival / durationTicks);
+
         public void ExposeData()
         {
             if (Scribe.mode == LoadSaveMode.Saving && map != null && !Find.Maps.Contains(map))
@@ -58,6 +74,9 @@ namespace Recruitment
             Scribe_References.Look(ref origin, "origin");
             Scribe_Values.Look(ref applicantCount, "applicantCount");
             Scribe_Values.Look(ref paidSilver, "paidSilver");
+            Scribe_Values.Look(ref premiumTier, "premiumTier");
+            Scribe_Values.Look(ref direct, "direct");
+            Scribe_Values.Look(ref starterSocial, "starterSocial", -1);
             Scribe_Values.Look(ref plannedMapName, "plannedMapName");
             Scribe_Values.Look(ref startTick, "startTick");
             Scribe_Values.Look(ref durationTicks, "durationTicks");
