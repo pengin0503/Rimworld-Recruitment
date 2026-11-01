@@ -32,6 +32,8 @@ namespace Recruitment
                 {
                     if (pawn.Faction != Faction.OfPlayer) pawn.SetFaction(Faction.OfPlayer);
                     RecruitmentUtility.Notify_BackFromAway(pawn);
+                    // Recheck on joining: covers applicants waiting in saves made before this update.
+                    RecruitmentUtility.MatchColonyIdeology(pawn);
                 },
                 () =>
                 {

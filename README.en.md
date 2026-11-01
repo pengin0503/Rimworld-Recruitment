@@ -13,7 +13,7 @@ A RimWorld 1.7 mod that recruits new colonists for a cost over time. Harmony is 
 | Radio | 250 silver | 3–5 days | Microelectronics Basics; select at the comms console |
 | Orbital | 600 silver | 1–3 days | AI Computer Core; select at the comms console; arrival by drop pod |
 
-These are defaults. Each request produces 0–3 applicants and is not refunded if none arrive. Applicants come from world factions, which determine race, xenotype and ideology. Empire applicants require a colonist with at least the Knight title.
+These are defaults. Each request produces 0–3 applicants and is not refunded if none arrive. Applicants come from world factions, which determine race and xenotype. With Ideology enabled, applicants adopt the most common ideoligion among living free colonists (ties favor the player's primary ideoligion, which is also the fallback when no eligible colonists remain). Empire applicants require a colonist with at least the Knight title.
 
 Every method opens a start dialog first, showing the cost, timing and the chances of each applicant count.
 

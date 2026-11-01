@@ -1,0 +1,27 @@
+name: Compile feature assembly
+
+on:
+  push:
+    branches: [feature/colony-ideology-for-applicants]
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet test Tests/Recruitment.Tests -c Release
+      - run: dotnet build Source/Recruitment -c Release
+      - name: Commit compiled DLL and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 1.7/Assemblies/Recruitment.dll
+          git rm .github/workflows/compile-feature-assembly.yml
+          git commit -m "build: update Recruitment.dll for ideology sync"
+          git push origin HEAD:feature/colony-ideology-for-applicants

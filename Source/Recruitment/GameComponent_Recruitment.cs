@@ -571,6 +571,7 @@ namespace Recruitment
                     group.historyEntry.generationFailures++;
                     continue;
                 }
+                RecruitmentUtility.MatchColonyIdeology(pawn);
                 if (pawn.IsWorldPawn())
                 {
                     Find.WorldPawns.RemovePawn(pawn);
