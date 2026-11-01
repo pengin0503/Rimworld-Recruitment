@@ -313,6 +313,40 @@ namespace Recruitment
 
         // ---- Applicants ---------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Gives a newly recruited applicant the most common ideoligion among living free colonists.
+        /// Ties prefer the player's primary ideoligion. With no eligible colonists, that primary
+        /// ideoligion is used; without Ideology or a valid ideoligion nothing changes.
+        /// </summary>
+        public static void MatchColonyIdeology(Pawn pawn)
+        {
+            if (!ModsConfig.IdeologyActive || pawn?.ideo == null || Find.IdeoManager == null)
+            {
+                return;
+            }
+            try
+            {
+                List<Ideo> activeIdeos = Find.IdeoManager.IdeosListForReading;
+                Ideo primary = Faction.OfPlayer?.ideos?.PrimaryIdeo;
+                if (primary != null && !activeIdeos.Contains(primary))
+                {
+                    primary = null;
+                }
+                Ideo selected = IdeologySelection.MostCommonOrDefault(
+                    PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists
+                        .Where(colonist => colonist?.ideo != null && colonist.Ideo != null && activeIdeos.Contains(colonist.Ideo))
+                        .Select(colonist => colonist.Ideo), primary);
+                if (selected != null && pawn.Ideo != selected)
+                {
+                    pawn.ideo.SetIdeo(selected);
+                }
+            }
+            catch (System.Exception error)
+            {
+                Log.ErrorOnce($"[Recruitment] Could not apply colony ideology to applicant {pawn}: {error}", pawn.thingIDNumber ^ 0x4944454F);
+            }
+        }
+
         /// <summary>Rolls 0..3 applicants; the starting colonist's Social skill shifts the chances (every method).</summary>
         public static int RollApplicantCount(int social)
         {
