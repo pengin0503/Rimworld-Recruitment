@@ -19,44 +19,29 @@ RimWorld 1.7 用の MOD です。失った入植者を、費用と日数をか�
 - 使者の交渉役の社交スキルが高いほど、応募者が0人になりにくくなります。
 - 費用・期間・人数の確率・使者の社交補正・同時募集数などは、MOD 設定で変更できます。
 
-## 構成
-
-```
-About/                 MOD 情報
-1.7/Assemblies/        ビルド済み DLL
-Defs/                  募集方式・ジョブ・レター・メインタブの定義
-Patches/               拠点に募集依頼の部品を追加する XML パッチ
-Textures/              アイコン（tools/textures/generate_icons.py で生成）
-Languages/             英語・日本語
-Source/Recruitment/    C# ソース（Logic/ は RimWorld に依存しない計算部分）
-Tests/                 Logic の単体テスト（xUnit）
-tools/check_mod.py     XML・翻訳キー・Def 参照の静的チェック
-docs/                  設計仕様とゲーム内テスト手順
-```
-
-## ビルド
-
-.NET 10 SDK（`global.json` で 10.0.403 に固定）が必要です。参照アセンブリは NuGet の `Krafs.Rimworld.Ref`（1.7.4985）を使うので、ゲーム本体がなくてもビルドできます。
-
-```sh
-dotnet test Tests/Recruitment.Tests        # 単体テスト
-dotnet build Source/Recruitment -c Release  # 1.7/Assemblies/Recruitment.dll を出力
-python3 tools/check_mod.py                  # 静的チェック（--rimworld-data <ゲームのData> でバニラ参照も確認）
-```
-
-`Source/` を変更したら、ビルドした `1.7/Assemblies/Recruitment.dll` も一緒にコミットしてください。CI は、コミットされた DLL がソースから再ビルドしたものと同じかを確認し、違えば失敗します。
-
-ゲーム内での確認手順は `docs/manual-test.md` にあります。
-
-## レビュー修正版の変更
+## 補足
 
 - 使者の依頼では、募集枠に空きがある拠点が候補になります。候補が複数ある場合は、出発指示時・訪問中の依頼時に到着先を選択します。到着先が消失したり枠が埋まった場合、支払い前に拒否します。
 - 応募者画面は、説明文の長さに応じて行の高さを変えます。
 - 採否を確定した後に移送が失敗しても、未処理の応募者と選択内容を保持し、250 tickごとに再試行します。募集タブから手動で再試行することもできます。確定済みの採否は再試行中に変更できません。
 - 募集タブの履歴に、支払額・出身・予定/実際の到着先・人数・結果を最新100件まで保存します。履歴はポーンを保持しません。旧セーブの完了済み募集は遡って復元できず、進行中の旧募集は残っている情報から記録します。
-- Releaseワークフローでも、配布前に単体テストを実行します。
 
 ## 注意
 
 - 判断待ちの応募者は、この MOD のデータとしてセーブされます。その状態で MOD を外すと、その応募者は失われます。
 - Harmony で変更しているのは、キャラバン編成画面の出発時（シルバーの警告）と、通信機の通信先一覧（「入植者募集を呼びかける」の追加）の2か所だけです。
+
+## English
+
+Colonist Recruitment adds ways to recruit replacement colonists in RimWorld 1.7. Harmony is required.
+
+| Method | Cost (silver) | Time | Requirement | Start |
+|---|---:|---|---|---|
+| Caravan | 50 | 6–10 days | None | Select a colonist and right-click a visiting trader |
+| Settlement envoy | 100 | 4–7 days after the request | None | Send a caravan with silver to a non-hostile settlement |
+| Radio broadcast | 250 | 3–5 days | Microelectronics Basics | Use the comms console |
+| Orbital communication | 600 | 1–3 days | AI Computer Core | Use the comms console; arrivals use drop pods |
+
+These are defaults and can be adjusted in mod settings. Each request produces 0–3 applicants; a request with no applicants is not refunded. Applicants come from world factions, with race, xenotype and ideology determined by their faction. Empire applicants require a colonist with at least the Knight title. By default, accept or reject applicants within 24 hours; automatic joining is configurable. Envoy social skill reduces the chance of zero applicants. Costs, timing, probabilities, simultaneous requests and other options can be changed in settings.
+
+The recruitment tab keeps a history of up to 100 requests. Removing the mod while applicants are awaiting a decision loses those applicants; back up your save first. Download an available package from [Releases](https://github.com/pengin0503/Rimworld-Recruitment/releases), put the mod folder in RimWorld's `Mods` folder, enable it after Harmony and restart the game.
