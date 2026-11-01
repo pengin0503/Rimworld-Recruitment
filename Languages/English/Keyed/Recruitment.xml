@@ -15,8 +15,46 @@
   <Recruitment_Reason_NoDestination>There is no colony the applicants can travel to.</Recruitment_Reason_NoDestination>
   <Recruitment_TraderLeft>{PAWN_labelShort} could not finish asking: the trader left or stopped trading.</Recruitment_TraderLeft>
   <Recruitment_BroadcastInterrupted>{PAWN_labelShort} could not finish the broadcast: the comms console stopped working.</Recruitment_BroadcastInterrupted>
-  <Recruitment_Confirm_Title>Start recruitment?</Recruitment_Confirm_Title>
-  <Recruitment_Confirm_Text>{0}\n\nCost: {1} silver (not returned if nobody applies)\nDuration: {2}-{3} days\nApplicants: {4}</Recruitment_Confirm_Text>
+  <Recruitment_Reason_NotColonyMap>the current map is not a colony</Recruitment_Reason_NotColonyMap>
+
+  <!-- Start dialog (every method) -->
+  <Recruitment_Start_Origin>Applicants from: {0}</Recruitment_Start_Origin>
+  <Recruitment_Start_OriginDrawn>a faction drawn from those willing to send settlers</Recruitment_Start_OriginDrawn>
+  <Recruitment_Start_Destination>Arriving at: {0}</Recruitment_Start_Destination>
+  <Recruitment_Start_Arrival>How they arrive: {0}</Recruitment_Start_Arrival>
+  <Recruitment_Start_Days>Duration: {0}-{1} days</Recruitment_Start_Days>
+  <Recruitment_Start_SocialHeading>Number of applicants</Recruitment_Start_SocialHeading>
+  <Recruitment_Start_Starter>{0} handles it (Social {1}).</Recruitment_Start_Starter>
+  <Recruitment_Start_NoStarter>Nobody can negotiate; Social 0 applies.</Recruitment_Start_NoStarter>
+  <Recruitment_Start_Chances>Chance of 0 / 1 / 2 / 3 applicants: {0} / {1} / {2} / {3}</Recruitment_Start_Chances>
+  <Recruitment_Start_PremiumHeading>Silver premium</Recruitment_Start_PremiumHeading>
+  <Recruitment_Start_PremiumOption>{0}: +{1}% (+{2} silver), best of {3} per applicant</Recruitment_Start_PremiumOption>
+  <Recruitment_Start_PremiumDesc>For each applicant, several candidates are found and the best one comes: the six best skills, plus passions, minus work they cannot do and health problems (traits do not count). The number of applicants does not change, and the premium is not returned if nobody comes.</Recruitment_Start_PremiumDesc>
+  <Recruitment_Premium_None>None</Recruitment_Premium_None>
+  <Recruitment_Premium_Some>Some</Recruitment_Premium_Some>
+  <Recruitment_Premium_More>More</Recruitment_Premium_More>
+  <Recruitment_Premium_Max>Maximum</Recruitment_Premium_Max>
+  <Recruitment_Start_CostHeading>Cost</Recruitment_Start_CostHeading>
+  <Recruitment_Start_CostLine>Silver: {0} + premium {1} = {2}</Recruitment_Start_CostLine>
+  <Recruitment_Start_GoodwillLine>Goodwill: -{0} ({1} → {2})</Recruitment_Start_GoodwillLine>
+  <Recruitment_Start_SilverLine>Silver available: {0}, left after paying: {1}</Recruitment_Start_SilverLine>
+  <Recruitment_Start_NotEnough>not enough</Recruitment_Start_NotEnough>
+  <Recruitment_Start_PayNow>Paid now from silver in storage or the home area.</Recruitment_Start_PayNow>
+  <Recruitment_Start_PayAfterTalk>Paid from silver in storage or the home area once {PAWN_labelShort} has talked to the trader.</Recruitment_Start_PayAfterTalk>
+  <Recruitment_Start_PayOnArrival>Paid from the caravan's goods when it arrives at {0}. The silver shown is what it carries now.</Recruitment_Start_PayOnArrival>
+  <Recruitment_Start_PayFromCaravan>Paid now from the caravan's goods at {0}.</Recruitment_Start_PayFromCaravan>
+  <Recruitment_Start_NoRefund>The silver is not returned if nobody comes.</Recruitment_Start_NoRefund>
+  <Recruitment_Start_Start>Start</Recruitment_Start_Start>
+
+  <!-- Asking a faction directly (its comms dialog) -->
+  <Recruitment_Direct_Option>Ask for settlers ({0} goodwill plus silver)</Recruitment_Direct_Option>
+  <Recruitment_Direct_Choose>{0} listens. How should {1} put out the call for settlers?</Recruitment_Direct_Choose>
+  <Recruitment_StartedDirect>{0} agreed to call for settlers by {1}. Applicants, if any, are expected in about {3}. Goodwill -{2}.</Recruitment_StartedDirect>
+  <Recruitment_Reason_FactionHostile>the faction is hostile</Recruitment_Reason_FactionHostile>
+  <Recruitment_Reason_Goodwill>goodwill would fall below 0 (costs {0}, currently {1})</Recruitment_Reason_Goodwill>
+  <Recruitment_Reason_DirectPending>the result of the last request to this faction is not known yet</Recruitment_Reason_DirectPending>
+  <Recruitment_Reason_NeedsPermit>{0} only sends settlers to colonies where someone holds the title needed to trade with it</Recruitment_Reason_NeedsPermit>
+  <Recruitment_Reason_GoodwillLocked>goodwill with this faction cannot change right now</Recruitment_Reason_GoodwillLocked>
 
   <!-- Envoys -->
 
@@ -56,16 +94,26 @@
   <Recruitment_Tab_Waiting>Applicants waiting for a decision</Recruitment_Tab_Waiting>
   <Recruitment_Tab_Methods>Methods</Recruitment_Tab_Methods>
   <Recruitment_Tab_None>None.</Recruitment_Tab_None>
-  <Recruitment_Tab_DriveLine>{0} at {1}, applicants {2}: {3}</Recruitment_Tab_DriveLine>
+  <Recruitment_Tab_DriveDetails>from {0} → {1} | premium: {2}</Recruitment_Tab_DriveDetails>
+  <Recruitment_Tab_DirectMark>(direct request)</Recruitment_Tab_DirectMark>
   <Recruitment_Tab_MapLost>(colony gone, will go elsewhere)</Recruitment_Tab_MapLost>
   <Recruitment_Tab_ArrivesIn>arrival in {0}</Recruitment_Tab_ArrivesIn>
-  <Recruitment_Tab_GroupLine>{0} applicant(s) from {1}, {2} left</Recruitment_Tab_GroupLine>
+  <Recruitment_Tab_GroupTitle>{0} applicant(s)</Recruitment_Tab_GroupTitle>
+  <Recruitment_Tab_TimeLeft>{0} left to decide</Recruitment_Tab_TimeLeft>
   <Recruitment_Tab_Review>Review</Recruitment_Tab_Review>
+  <Recruitment_Tab_MethodsOn>Availability on the current map ({0}):</Recruitment_Tab_MethodsOn>
   <Recruitment_Tab_MethodLine>{0}: {1} silver, {2}-{3} days</Recruitment_Tab_MethodLine>
-  <Recruitment_Tab_NeedsResearch>(needs research: {0})</Recruitment_Tab_NeedsResearch>
+  <Recruitment_Tab_Usable>Available</Recruitment_Tab_Usable>
+  <Recruitment_Tab_Unusable>Not available</Recruitment_Tab_Unusable>
   <Recruitment_Tab_HowTo_Trader>Select a colonist and right-click a visiting trader.</Recruitment_Tab_HowTo_Trader>
   <Recruitment_Tab_HowTo_Envoy>Form a caravan with silver, then right-click a non-hostile settlement on the world map (or use the button while visiting one).</Recruitment_Tab_HowTo_Envoy>
-  <Recruitment_Tab_HowTo_CommsConsole>Select a colonist, right-click a powered comms console and choose "Broadcast a call for settlers".</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_HowTo_CommsConsole>Select a colonist, right-click a powered comms console and choose "Broadcast a call for settlers". To ask one faction, open its comms dialog instead.</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_Factions>Factions and settlements</Recruitment_Tab_Factions>
+  <Recruitment_Tab_FactionLine>{0}: goodwill {1} ({2})</Recruitment_Tab_FactionLine>
+  <Recruitment_Tab_DirectAvailable>Can be asked directly from its comms dialog ({0} goodwill)</Recruitment_Tab_DirectAvailable>
+  <Recruitment_Tab_DirectPending>Asked directly; waiting for the result</Recruitment_Tab_DirectPending>
+  <Recruitment_Tab_Cooldowns>Settlements asked recently: {0}</Recruitment_Tab_Cooldowns>
+  <Recruitment_Tab_CooldownEntry>{0} ({1} left)</Recruitment_Tab_CooldownEntry>
 
   <!-- Settings -->
   <Recruitment_Settings_General>General</Recruitment_Settings_General>
@@ -78,20 +126,24 @@
   <Recruitment_Settings_IncludePermanentEnemiesDesc>For example pirates. Off by default.</Recruitment_Settings_IncludePermanentEnemiesDesc>
   <Recruitment_Settings_AllowChildren>Children can apply</Recruitment_Settings_AllowChildren>
   <Recruitment_Settings_AllowChildrenDesc>Only when the storyteller settings allow children.</Recruitment_Settings_AllowChildrenDesc>
-  <Recruitment_Settings_ConfirmExpensive>Ask before starting expensive drives</Recruitment_Settings_ConfirmExpensive>
-  <Recruitment_Settings_ConfirmExpensiveDesc>Shows the cost, duration and how applicants arrive before a drive that costs at least the amount below. Set the amount to 0 to always ask.</Recruitment_Settings_ConfirmExpensiveDesc>
-  <Recruitment_Settings_ConfirmThreshold>Ask from this many silver</Recruitment_Settings_ConfirmThreshold>
   <Recruitment_Settings_Applicants>Number of applicants</Recruitment_Settings_Applicants>
+  <Recruitment_Settings_ApplicantsDesc>The Social skill of the colonist who starts a drive (the one talking to the trader, the caravan's negotiator, or the one at the comms console) blends the chances between these two sets.</Recruitment_Settings_ApplicantsDesc>
+  <Recruitment_Settings_AtSocialZero>At Social 0</Recruitment_Settings_AtSocialZero>
+  <Recruitment_Settings_AtSocialMax>At Social 20</Recruitment_Settings_AtSocialMax>
+  <Recruitment_Settings_AtSocialTen>At Social 10: {0}</Recruitment_Settings_AtSocialTen>
   <Recruitment_Settings_ApplicantWeight>{0} applicant(s): weight {1} ({2})</Recruitment_Settings_ApplicantWeight>
+  <Recruitment_Settings_Score>Silver premium: candidate score</Recruitment_Settings_Score>
+  <Recruitment_Settings_ScoreDesc>With a premium, the candidate with the highest score comes: the {0} best skill levels added up, plus the points below for passions, minus the points below for each work type they cannot do and each health problem.</Recruitment_Settings_ScoreDesc>
+  <Recruitment_Settings_ScoreMinorPassion>Minor passion: +{0}</Recruitment_Settings_ScoreMinorPassion>
+  <Recruitment_Settings_ScoreMajorPassion>Major passion: +{0}</Recruitment_Settings_ScoreMajorPassion>
+  <Recruitment_Settings_ScoreIncapable>Each work type they cannot do: -{0}</Recruitment_Settings_ScoreIncapable>
+  <Recruitment_Settings_ScoreHealth>Each health problem: -{0}</Recruitment_Settings_ScoreHealth>
   <Recruitment_Settings_Methods>Cost and duration</Recruitment_Settings_Methods>
   <Recruitment_Settings_Cost>Silver</Recruitment_Settings_Cost>
   <Recruitment_Settings_MinDays>Minimum days</Recruitment_Settings_MinDays>
   <Recruitment_Settings_MaxDays>Maximum days</Recruitment_Settings_MaxDays>
   <Recruitment_Settings_MinAboveMax>The minimum is above the maximum; the two will be swapped.</Recruitment_Settings_MinAboveMax>
   <Recruitment_Settings_Envoy>Asking at settlements</Recruitment_Settings_Envoy>
-  <Recruitment_Settings_EnvoyZeroAtZero>Chance of nobody at social 0: {0}</Recruitment_Settings_EnvoyZeroAtZero>
-  <Recruitment_Settings_EnvoyZeroPerLevel>Reduction of that chance per social level: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
-  <Recruitment_Settings_EnvoyPreview>Chance of nobody: social 0: {0} / social 10: {1} / social 20: {2}</Recruitment_Settings_EnvoyPreview>
   <Recruitment_Settings_Reset>Reset to defaults</Recruitment_Settings_Reset>
 
   <Recruitment_Reason_NoNegotiator>nobody in the caravan can negotiate with this faction</Recruitment_Reason_NoNegotiator>
@@ -126,7 +178,9 @@
 
   <Recruitment_Alert_ShortOfSilver>Envoy caravan lacks silver</Recruitment_Alert_ShortOfSilver>
 
-  <Recruitment_Alert_ShortOfSilverDesc>These caravans are on their way to ask a settlement for settlers, but no longer carry the {0} silver the request costs.</Recruitment_Alert_ShortOfSilverDesc>
+  <Recruitment_Alert_ShortOfSilverDesc>These caravans are on their way to ask a settlement for settlers, but no longer carry the silver the request costs (premium included):\n\n{0}</Recruitment_Alert_ShortOfSilverDesc>
+
+  <Recruitment_Alert_ShortOfSilverLine>{0}: needs {1}, carries {2}</Recruitment_Alert_ShortOfSilverLine>
 
   <Recruitment_Settings_EnvoyCooldown>Days before a settlement can be asked again: {0}</Recruitment_Settings_EnvoyCooldown>
 

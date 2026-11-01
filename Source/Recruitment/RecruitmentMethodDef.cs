@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Recruitment
@@ -40,12 +41,20 @@ namespace Recruitment
 
         public int uiOrder;
 
-        /// <summary>How applicants arrive, for the confirmation dialog (e.g. "walk in from the map edge").</summary>
+        /// <summary>How applicants arrive, for the start dialog (e.g. "walk in from the map edge").</summary>
         [MustTranslate]
         public string arrivalLabel;
 
-        public bool UsesEnvoySocial => startKind == RecruitmentStartKind.Envoy;
+        /// <summary>Texture path of the method's icon in the recruitment tab and the start dialog.</summary>
+        public string iconPath;
 
+        [Unsaved]
+        private Texture2D icon;
+
+        /// <summary>Loaded on first use; UI code runs on the main thread, where textures may be loaded.</summary>
+        public Texture2D Icon => icon ??= iconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(iconPath);
+
+        /// <summary>The method's own cost in silver, without a premium.</summary>
         public int Cost => RecruitmentMod.Settings.CostFor(this);
 
         public FloatRange Days => RecruitmentMod.Settings.DaysFor(this);
@@ -74,6 +83,10 @@ namespace Recruitment
             if (arrivalLabel.NullOrEmpty())
             {
                 yield return "arrivalLabel is not set.";
+            }
+            if (iconPath.NullOrEmpty())
+            {
+                yield return "iconPath is not set.";
             }
             if (arrivalModes.NullOrEmpty())
             {

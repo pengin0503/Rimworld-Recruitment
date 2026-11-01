@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Recruitment.Logic;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -48,26 +49,19 @@ namespace Recruitment
             s.decisionHours = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_DecisionHours".Translate(s.decisionHours.ToString("0")), s.decisionHours, 1f, 120f));
             listing.CheckboxLabeled("Recruitment_Settings_IncludePermanentEnemies".Translate(), ref s.includePermanentEnemies, "Recruitment_Settings_IncludePermanentEnemiesDesc".Translate());
             listing.CheckboxLabeled("Recruitment_Settings_AllowChildren".Translate(), ref s.allowChildren, "Recruitment_Settings_AllowChildrenDesc".Translate());
-            listing.CheckboxLabeled("Recruitment_Settings_ConfirmExpensive".Translate(), ref s.confirmExpensive, "Recruitment_Settings_ConfirmExpensiveDesc".Translate());
-            if (s.confirmExpensive)
-            {
-                string thresholdBuffer = Buffer("confirmThreshold", s.confirmThreshold.ToString());
-                listing.TextFieldNumericLabeled("  " + "Recruitment_Settings_ConfirmThreshold".Translate(), ref s.confirmThreshold, ref thresholdBuffer, 0f, 1000000f);
-                buffers["confirmThreshold"] = thresholdBuffer;
-            }
 
             Heading(listing, "Recruitment_Settings_Applicants");
-            float total = 0f;
-            foreach (float w in s.applicantWeights)
-            {
-                total += Mathf.Max(0f, w);
-            }
-            for (int i = 0; i < ApplicantRoll.OutcomeCount; i++)
-            {
-                float chance = total > 0f ? Mathf.Max(0f, s.applicantWeights[i]) / total : (i == 0 ? 1f : 0f);
-                string label = "Recruitment_Settings_ApplicantWeight".Translate(i, s.applicantWeights[i].ToString("0"), chance.ToStringPercent());
-                s.applicantWeights[i] = Mathf.Round(listing.SliderLabeled(label, s.applicantWeights[i], 0f, 100f));
-            }
+            listing.Label("Recruitment_Settings_ApplicantsDesc".Translate().Resolve().Colorize(ColoredText.SubtleGrayColor));
+            WeightSliders(listing, "Recruitment_Settings_AtSocialZero", s.applicantWeights, s.ApplicantChances(0));
+            WeightSliders(listing, "Recruitment_Settings_AtSocialMax", s.applicantWeightsAtMaxSocial, s.ApplicantChances(SocialWeights.MaxSkill));
+            listing.Label("Recruitment_Settings_AtSocialTen".Translate(RecruitmentUI.ChancesText(s.ApplicantChances(10))));
+
+            Heading(listing, "Recruitment_Settings_Score");
+            listing.Label("Recruitment_Settings_ScoreDesc".Translate(ApplicantScore.TopSkills).Resolve().Colorize(ColoredText.SubtleGrayColor));
+            s.scoreMinorPassion = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_ScoreMinorPassion".Translate(s.scoreMinorPassion.ToString("0")), s.scoreMinorPassion, 0f, 20f));
+            s.scoreMajorPassion = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_ScoreMajorPassion".Translate(s.scoreMajorPassion.ToString("0")), s.scoreMajorPassion, 0f, 20f));
+            s.scoreIncapablePenalty = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_ScoreIncapable".Translate(s.scoreIncapablePenalty.ToString("0")), s.scoreIncapablePenalty, 0f, 30f));
+            s.scoreHealthPenalty = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_ScoreHealth".Translate(s.scoreHealthPenalty.ToString("0")), s.scoreHealthPenalty, 0f, 30f));
 
             Heading(listing, "Recruitment_Settings_Methods");
             foreach (RecruitmentMethodDef method in RecruitmentMethodDef.AllInOrder)
@@ -95,10 +89,6 @@ namespace Recruitment
             }
 
             Heading(listing, "Recruitment_Settings_Envoy");
-            s.envoyZeroChanceAtZero = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyZeroAtZero".Translate(s.envoyZeroChanceAtZero.ToStringPercent()), s.envoyZeroChanceAtZero, 0f, 1f));
-            s.envoyZeroChancePerLevel = Rounded(listing.SliderLabeled("Recruitment_Settings_EnvoyZeroPerLevel".Translate(s.envoyZeroChancePerLevel.ToStringPercent("0.#")), s.envoyZeroChancePerLevel, 0f, 0.1f), 1000f);
-            EnvoySocialCurve curve = s.EnvoyCurve;
-            listing.Label("Recruitment_Settings_EnvoyPreview".Translate(curve.ZeroChance(0).ToStringPercent(), curve.ZeroChance(10).ToStringPercent(), curve.ZeroChance(20).ToStringPercent()));
             s.envoyCooldownDays = Mathf.Round(listing.SliderLabeled("Recruitment_Settings_EnvoyCooldown".Translate(s.envoyCooldownDays.ToString("0")), s.envoyCooldownDays, 0f, 60f));
 
             listing.GapLine();
@@ -132,9 +122,15 @@ namespace Recruitment
             return value;
         }
 
-        private static float Rounded(float value, float steps = 100f)
+        /// <summary>Sliders for one set of 0..3 applicant weights, each labelled with the chance it gives.</summary>
+        private static void WeightSliders(Listing_Standard listing, string headingKey, List<float> weights, float[] chances)
         {
-            return Mathf.Round(value * steps) / steps;
+            listing.Label(headingKey.Translate());
+            for (int i = 0; i < ApplicantRoll.OutcomeCount; i++)
+            {
+                string label = "  " + "Recruitment_Settings_ApplicantWeight".Translate(i, weights[i].ToString("0"), chances[i].ToStringPercent());
+                weights[i] = Mathf.Round(listing.SliderLabeled(label, weights[i], 0f, 100f));
+            }
         }
     }
 }

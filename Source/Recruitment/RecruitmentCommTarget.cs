@@ -1,5 +1,4 @@
 using System.Linq;
-using Recruitment.Logic;
 using RimWorld;
 using Verse;
 
@@ -12,7 +11,8 @@ namespace Recruitment
     /// </summary>
     public class RecruitmentCommTarget : ICommunicable, IExposable, ILoadReferenceable
     {
-        private static IOrderedEnumerable<RecruitmentMethodDef> CommsMethods => RecruitmentMethodDef.AllInOrder.Where(m => m.startKind == RecruitmentStartKind.CommsConsole).OrderBy(m => m.uiOrder);
+        /// <summary>The methods started from a comms console (radio, orbital), in menu order.</summary>
+        public static IOrderedEnumerable<RecruitmentMethodDef> CommsMethods => RecruitmentMethodDef.AllInOrder.Where(m => m.startKind == RecruitmentStartKind.CommsConsole).OrderBy(m => m.uiOrder);
 
         public string GetCallLabel()
         {
@@ -57,39 +57,28 @@ namespace Recruitment
             GameComponent_Recruitment component = GameComponent_Recruitment.Instance;
             foreach (RecruitmentMethodDef method in CommsMethods)
             {
-                var option = new DiaOption(RecruitmentFloatMenu.OptionLabel(method));
-                AcceptanceReport report = component.CanStart(method, negotiator.Map, needsOriginLottery: true);
-                if (!report.Accepted)
-                {
-                    option.Disable(report.Reason);
-                }
-                else if (ConfirmationRule.ShouldConfirm(method.Cost, RecruitmentMod.Settings.EffectiveConfirmThreshold))
-                {
-                    // The dialog already shows the cost; the confirmation step stays inside it.
-                    option.link = ConfirmNode(method, negotiator, node);
-                }
-                else
-                {
-                    option.action = () => component.TryStart(method, negotiator.Map, null, negotiator);
-                    option.resolveTree = true;
-                }
-                node.options.Add(option);
+                node.options.Add(MethodOption(method, negotiator, component.CanStart(method, negotiator.Map, needsOriginLottery: true), faction: null));
             }
             node.options.Add(new DiaOption("Recruitment_Comms_HangUp".Translate()) { resolveTree = true });
             return node;
         }
 
-        private static DiaNode ConfirmNode(RecruitmentMethodDef method, Pawn negotiator, DiaNode back)
+        /// <summary>
+        /// One comms method in a negotiation dialog. Choosing it closes the call and opens the start dialog, which
+        /// shows the cost and the premium and serves as the confirmation. <paramref name="report"/> is checked
+        /// without a premium, so a disabled option means even the plain method is unavailable.
+        /// </summary>
+        public static DiaOption MethodOption(RecruitmentMethodDef method, Pawn negotiator, AcceptanceReport report, Faction faction)
         {
-            FloatRange days = method.Days;
-            var node = new DiaNode("Recruitment_Confirm_Text".Translate(method.LabelCap, method.Cost, days.min.ToString("0.#"), days.max.ToString("0.#"), method.arrivalLabel));
-            node.options.Add(new DiaOption("Confirm".Translate())
+            var option = new DiaOption(RecruitmentFloatMenu.OptionLabel(method));
+            if (!report.Accepted)
             {
-                action = () => GameComponent_Recruitment.Instance.TryStart(method, negotiator.Map, null, negotiator),
-                resolveTree = true,
-            });
-            node.options.Add(new DiaOption("GoBack".Translate()) { link = back });
-            return node;
+                option.Disable(report.Reason);
+                return option;
+            }
+            option.action = () => RecruitmentUI.OpenForComms(method, negotiator, faction);
+            option.resolveTree = true;
+            return option;
         }
 
         public string GetUniqueLoadID()

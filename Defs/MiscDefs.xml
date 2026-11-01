@@ -10,6 +10,12 @@
     <arriveSound>LetterArrive_Good</arriveSound>
   </LetterDef>
 
+  <!-- Goodwill reason for asking a faction for settlers over the comms console (like vanilla RequestedTrader). -->
+  <HistoryEventDef>
+    <defName>Recruitment_RequestedSettlers</defName>
+    <label>requested settlers</label>
+  </HistoryEventDef>
+
   <MainButtonDef>
     <defName>Recruitment</defName>
     <label>recruitment</label>

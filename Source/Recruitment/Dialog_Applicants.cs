@@ -225,7 +225,7 @@ namespace Recruitment
                     .Select(s => s.def.LabelCap + " " + s.Level + PassionMark(s.passion));
                 lines.Add("Recruitment_Dialog_Skills".Translate(string.Join(", ", skills)));
             }
-            List<string> disabledWork = DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(w => w.visible && pawn.WorkTypeIsDisabled(w)).Select(w => w.labelShort.CapitalizeFirst()).ToList();
+            List<string> disabledWork = RecruitmentUtility.DisabledWorkTypes(pawn).Select(w => w.labelShort.CapitalizeFirst()).ToList();
             if (disabledWork.Count > 0)
             {
                 lines.Add("Recruitment_Dialog_Incapable".Translate(string.Join(", ", disabledWork)));

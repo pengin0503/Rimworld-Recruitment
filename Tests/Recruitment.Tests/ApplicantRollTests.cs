@@ -59,27 +59,14 @@ namespace Recruitment.Tests
         }
 
         [Fact]
-        public void EnvoyProbabilitiesFixZeroChanceAndSplitRestByWeights()
+        public void SocialChancesCanBeRolledDirectly()
         {
-            float[] p = ApplicantRoll.WithZeroChance(new[] { 9f, 1f, 1f, 2f }, 0.2f);
-            Assert.Equal(0.2f, p[0], 5);
-            Assert.Equal(0.2f, p[1], 5);
-            Assert.Equal(0.2f, p[2], 5);
-            Assert.Equal(0.4f, p[3], 5);
-        }
-
-        [Fact]
-        public void EnvoyProbabilitiesWithNoPositiveWeightsGiveEverythingToZero()
-        {
-            float[] p = ApplicantRoll.WithZeroChance(new[] { 1f, 0f, 0f, 0f }, 0.2f);
-            Assert.Equal(new[] { 1f, 0f, 0f, 0f }, p);
-        }
-
-        [Fact]
-        public void EnvoyZeroChanceIsClamped()
-        {
-            Assert.Equal(1f, ApplicantRoll.WithZeroChance(Even, 1.5f)[0], 5);
-            Assert.Equal(0f, ApplicantRoll.WithZeroChance(Even, -0.5f)[0], 5);
+            // RollApplicantCount feeds SocialWeights.Chances (summing to 1) into Roll.
+            float[] chances = SocialWeights.Chances(new[] { 25f, 25f, 25f, 25f }, new[] { 5f, 15f, 50f, 30f }, 20);
+            Assert.Equal(0, ApplicantRoll.Roll(chances, 0.04));
+            Assert.Equal(1, ApplicantRoll.Roll(chances, 0.06));
+            Assert.Equal(2, ApplicantRoll.Roll(chances, 0.69));
+            Assert.Equal(3, ApplicantRoll.Roll(chances, 0.71));
         }
     }
 }

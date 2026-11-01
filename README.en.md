@@ -15,7 +15,13 @@ A RimWorld 1.7 mod that recruits new colonists for a cost over time. Harmony is 
 
 These are defaults. Each request produces 0–3 applicants and is not refunded if none arrive. Applicants come from world factions, which determine race, xenotype and ideology. Empire applicants require a colonist with at least the Knight title.
 
-By default, compare and accept or reject applicants within 24 hours of arrival. Automatic joining is also available. Higher envoy social skill reduces the chance of zero applicants, and the default cooldown for requesting the same settlement again is 15 days. Mod settings control costs, timing, applicant probabilities, simultaneous requests and more. The recruitment tab retains up to 100 history entries.
+Every method opens a start dialog first, showing the cost, timing and the chances of each applicant count.
+
+- **Social skill**: the higher the Social skill of the colonist who starts a drive (the one talking to the trader, the caravan's negotiator, or the one at the comms console), the more applicants are likely. By default, Social 0 gives 25% each for 0–3 applicants and Social 20 gives 5% / 15% / 50% / 30%.
+- **Silver premium**: adding +50% / +100% / +200% to the cost makes the best of 2 / 3 / 4 candidates come for each applicant, rated by skills, passions, work they cannot do and health (traits are not rated). The number of applicants does not change.
+- **Asking a faction directly**: open a faction's comms dialog and choose "Ask for settlers" to have that faction call for settlers, for the silver of radio or orbital comms plus 10 goodwill (11–13 at times, by the same adjustment the game applies to requesting a trader). The faction must not be hostile, must keep 0 or more goodwill afterwards, and its previous direct request must have its result.
+
+By default, compare and accept or reject applicants within 24 hours of arrival. Automatic joining is also available. The default cooldown for requesting the same settlement again is 15 days. Mod settings control costs, timing, applicant probabilities, the premium rating, simultaneous requests and more. The recruitment tab shows the progress of running drives, which methods work on the current map, which factions can be asked directly, and up to 100 history entries.
 
 ## Installation and saves
 

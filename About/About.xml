@@ -4,7 +4,7 @@
   <packageId>pengin0503.recruitment</packageId>
   <author>pengin0503</author>
   <url>https://github.com/pengin0503/Rimworld-Recruitment</url>
-  <modVersion>1.0.0</modVersion>
+  <modVersion>1.1.0</modVersion>
   <supportedVersions>
     <li>1.7</li>
   </supportedVersions>
@@ -19,11 +19,11 @@
   <loadAfter>
     <li>brrainz.harmony</li>
   </loadAfter>
-  <description>Replace lost colonists by recruiting new ones. Ask a visiting trader to spread the word, send a caravan to ask at a settlement, broadcast from a comms console, or reach the whole planet over orbital comms. Each method costs silver and takes some days; then 0 to 3 applicants arrive and you choose whom to accept.
+  <description>Replace lost colonists by recruiting new ones. Ask a visiting trader to spread the word, send a caravan to ask at a settlement, broadcast from a comms console, or reach the whole planet over orbital comms - or ask one faction directly from its comms dialog for some goodwill. Each method costs silver and takes some days; then 0 to 3 applicants arrive and you choose whom to accept. The Social skill of the colonist who starts a drive makes more applicants likely, and paying extra silver brings better candidates.
 
 Applicants come from the world's factions, so their race, xenotype and ideoligion follow that faction - this works with races added by other mods without special support. Requires Harmony.
 
-失った入植者を「募集」で補充できるようにします。来訪した商人に募集を頼む、キャラバンで拠点を訪ねて募集を頼む、通信機で放送する、軌道通信で惑星全体に呼びかける、の4方式があります。どの方式もシルバーと日数がかかり、0〜3人の応募者が到着したら、採用する人を選べます。
+失った入植者を「募集」で補充できるようにします。来訪した商人に募集を頼む、キャラバンで拠点を訪ねて募集を頼む、通信機で放送する、軌道通信で惑星全体に呼びかける、の4方式があります。派閥との通信画面から、友好値を払ってその派閥に直接依頼することもできます。どの方式もシルバーと日数がかかり、0〜3人の応募者が到着したら、採用する人を選べます。募集を始めた入植者の社交スキルが高いほど応募者が増えやすく、シルバーを上乗せすると優秀な人が来やすくなります。
 
 応募者はワールドの派閥から来るため、種族・ゼノタイプ・思想はその派閥に従います。他MODで追加された種族にも、個別対応なしで対応します。Harmony が必要です。</description>
 </ModMetaData>

@@ -3,13 +3,15 @@
 
   <!--
     Recruitment methods. Cost (silver) and days are defaults; players can override them in the mod settings.
-    Other mods can patch these defs, e.g. to change researchPrerequisites.
+    Other mods can patch these defs, e.g. to change researchPrerequisites. With every method, the Social skill of
+    the colonist who starts it shifts the chances of 0-3 applicants, and a silver premium can be added.
   -->
 
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Caravan</defName>
     <label>recruit through a trader</label>
     <description>Ask a visiting trader to spread word of the colony on their travels. Applicants come from the trader's faction and walk in.</description>
+    <iconPath>UI/Icons/Recruitment_Method_Trader</iconPath>
     <startKind>Trader</startKind>
     <startJob>Recruitment_RequestFromTrader</startJob>
     <baseCost>50</baseCost>
@@ -26,7 +28,8 @@
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Envoy</defName>
     <label>ask at a settlement</label>
-    <description>Send a caravan to a settlement of a friendly or neutral faction and ask there for settlers. The silver is paid from the caravan's goods on arrival; applicants from that faction then walk to the colony. The caravan's best social skill makes it less likely that nobody comes. Each settlement can only be asked once in a while.</description>
+    <description>Send a caravan to a settlement of a friendly or neutral faction and ask there for settlers. The silver is paid from the caravan's goods on arrival; applicants from that faction then walk to the colony. Each settlement can only be asked once in a while.</description>
+    <iconPath>UI/Icons/Recruitment_Method_Envoy</iconPath>
     <startKind>Envoy</startKind>
     <baseCost>100</baseCost>
     <baseDays>4~7</baseDays>
@@ -42,7 +45,8 @@
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Radio</defName>
     <label>radio broadcast</label>
-    <description>Broadcast a call for settlers from a powered comms console ("call for settlers" in its list of contacts). Applicants walk in. Radio cannot reach the planet from space.</description>
+    <description>Broadcast a call for settlers from a powered comms console ("call for settlers" in its list of contacts), or ask one faction directly from its comms dialog. Applicants walk in. Radio cannot reach the planet from space.</description>
+    <iconPath>UI/Icons/Recruitment_Method_Radio</iconPath>
     <startKind>CommsConsole</startKind>
     <!-- Only for saves with the old broadcast job in progress; new drives start from the comms console's contact list. -->
     <startJob>Recruitment_BroadcastRadio</startJob>
@@ -63,7 +67,8 @@
   <Recruitment.RecruitmentMethodDef>
     <defName>Recruitment_Orbital</defName>
     <label>orbital comms</label>
-    <description>Relay a call for settlers through orbit from a powered comms console. Applicants drop in by transport pod near the colony, and this also works from space.</description>
+    <description>Relay a call for settlers through orbit from a powered comms console, or ask one faction directly from its comms dialog. Applicants drop in by transport pod near the colony, and this also works from space.</description>
+    <iconPath>UI/Icons/Recruitment_Method_Orbital</iconPath>
     <startKind>CommsConsole</startKind>
     <!-- Only for saves with the old broadcast job in progress. -->
     <startJob>Recruitment_BroadcastOrbital</startJob>

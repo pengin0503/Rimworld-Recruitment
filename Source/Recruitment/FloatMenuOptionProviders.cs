@@ -55,12 +55,9 @@ namespace Recruitment
                 yield return RecruitmentFloatMenu.Disabled(method, canStart.Reason);
                 yield break;
             }
-            yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(method), () => RecruitmentUI.ConfirmThen(method, () =>
-            {
-                Job job = JobMaker.MakeJob(method.startJob, clickedPawn);
-                job.playerForced = true;
-                negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-            }), MenuOptionPriority.InitiateSocial, null, clickedPawn), negotiator, clickedPawn);
+            yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(RecruitmentFloatMenu.OptionLabel(method),
+                () => RecruitmentUI.OpenForTrader(method, negotiator, clickedPawn),
+                MenuOptionPriority.InitiateSocial, null, clickedPawn), negotiator, clickedPawn);
         }
     }
 }

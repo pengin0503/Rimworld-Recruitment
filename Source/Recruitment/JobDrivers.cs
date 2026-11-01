@@ -45,7 +45,8 @@ namespace Recruitment
                     Messages.Message(canTrade.Reason.NullOrEmpty() ? "CannotTrade".Translate().Resolve() : canTrade.Reason, pawn, MessageTypeDefOf.RejectInput, historical: false);
                     return;
                 }
-                GameComponent_Recruitment.Instance.TryStart(method, pawn.Map, trader.Faction, pawn);
+                // Job.count holds the premium chosen in the start dialog (-1, i.e. none, for jobs from 1.0 saves).
+                GameComponent_Recruitment.Instance.TryStart(method, pawn.Map, trader.Faction, pawn, System.Math.Max(0, job.count));
             };
             start.defaultCompleteMode = ToilCompleteMode.Instant;
             yield return start;
@@ -87,7 +88,7 @@ namespace Recruitment
             start.initAction = () =>
             {
                 RecruitmentMethodDef method = RecruitmentMethodDef.ForJob(job.def);
-                GameComponent_Recruitment.Instance.TryStart(method, pawn.Map, null, pawn);
+                GameComponent_Recruitment.Instance.TryStart(method, pawn.Map, null, pawn, premiumTier: 0);
             };
             start.defaultCompleteMode = ToilCompleteMode.Instant;
             yield return start;

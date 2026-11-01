@@ -15,8 +15,46 @@
   <Recruitment_Reason_NoDestination>応募者が向かえる拠点がありません。</Recruitment_Reason_NoDestination>
   <Recruitment_TraderLeft>商人が立ち去ったか交易をやめたため、{PAWN_labelShort}は募集を頼めませんでした。</Recruitment_TraderLeft>
   <Recruitment_BroadcastInterrupted>通信機が使えなくなったため、{PAWN_labelShort}は放送を終えられませんでした。</Recruitment_BroadcastInterrupted>
-  <Recruitment_Confirm_Title>募集を開始しますか？</Recruitment_Confirm_Title>
-  <Recruitment_Confirm_Text>{0}\n\n費用: {1}シルバー（応募者が0人でも返却されません）\n期間: {2}〜{3}日\n到着: {4}</Recruitment_Confirm_Text>
+  <Recruitment_Reason_NotColonyMap>今のマップは拠点ではありません</Recruitment_Reason_NotColonyMap>
+
+  <!-- 募集開始画面（すべての方式） -->
+  <Recruitment_Start_Origin>応募者の出身: {0}</Recruitment_Start_Origin>
+  <Recruitment_Start_OriginDrawn>入植者を送ってくれる派閥から抽選</Recruitment_Start_OriginDrawn>
+  <Recruitment_Start_Destination>到着先: {0}</Recruitment_Start_Destination>
+  <Recruitment_Start_Arrival>到着方法: {0}</Recruitment_Start_Arrival>
+  <Recruitment_Start_Days>期間: {0}〜{1}日</Recruitment_Start_Days>
+  <Recruitment_Start_SocialHeading>応募者の人数</Recruitment_Start_SocialHeading>
+  <Recruitment_Start_Starter>担当: {0}（社交 {1}）</Recruitment_Start_Starter>
+  <Recruitment_Start_NoStarter>交渉できる人がいないため、社交0として扱います。</Recruitment_Start_NoStarter>
+  <Recruitment_Start_Chances>0人 {0} ／ 1人 {1} ／ 2人 {2} ／ 3人 {3}</Recruitment_Start_Chances>
+  <Recruitment_Start_PremiumHeading>シルバーの上乗せ</Recruitment_Start_PremiumHeading>
+  <Recruitment_Start_PremiumOption>{0}: +{1}%（+{2}シルバー）、応募者1人につき候補{3}人から選ぶ</Recruitment_Start_PremiumOption>
+  <Recruitment_Start_PremiumDesc>応募者1人ごとに複数の候補を探し、評価が最も高い人が来ます。評価は、技能の上位6つ、情熱、できない仕事、健康上の問題で決まります（特性は含みません）。応募者の人数は変わらず、応募者が0人でも上乗せ分は返却されません。</Recruitment_Start_PremiumDesc>
+  <Recruitment_Premium_None>なし</Recruitment_Premium_None>
+  <Recruitment_Premium_Some>少し</Recruitment_Premium_Some>
+  <Recruitment_Premium_More>多め</Recruitment_Premium_More>
+  <Recruitment_Premium_Max>最大</Recruitment_Premium_Max>
+  <Recruitment_Start_CostHeading>費用</Recruitment_Start_CostHeading>
+  <Recruitment_Start_CostLine>シルバー: {0} ＋ 上乗せ {1} ＝ {2}</Recruitment_Start_CostLine>
+  <Recruitment_Start_GoodwillLine>友好値: -{0}（{1} → {2}）</Recruitment_Start_GoodwillLine>
+  <Recruitment_Start_SilverLine>使えるシルバー: {0}、支払い後: {1}</Recruitment_Start_SilverLine>
+  <Recruitment_Start_NotEnough>不足</Recruitment_Start_NotEnough>
+  <Recruitment_Start_PayNow>今すぐ、倉庫・居住エリア内のシルバーから支払います。</Recruitment_Start_PayNow>
+  <Recruitment_Start_PayAfterTalk>{PAWN_labelShort}が商人と話し終えた時点で、倉庫・居住エリア内のシルバーから支払います。</Recruitment_Start_PayAfterTalk>
+  <Recruitment_Start_PayOnArrival>{0}に到着した時点で、キャラバンの持ち物から支払います。表示しているのは、今キャラバンが持っているシルバーです。</Recruitment_Start_PayOnArrival>
+  <Recruitment_Start_PayFromCaravan>{0}で、今すぐキャラバンの持ち物から支払います。</Recruitment_Start_PayFromCaravan>
+  <Recruitment_Start_NoRefund>応募者が0人でも、シルバーは返却されません。</Recruitment_Start_NoRefund>
+  <Recruitment_Start_Start>開始</Recruitment_Start_Start>
+
+  <!-- 派閥への直接募集（派閥との通信画面） -->
+  <Recruitment_Direct_Option>入植者の募集を依頼する（友好値{0}とシルバー）</Recruitment_Direct_Option>
+  <Recruitment_Direct_Choose>{0}が話を聞いています。{1}にどの方法で入植者を募ってもらいますか？</Recruitment_Direct_Choose>
+  <Recruitment_StartedDirect>{0}が{1}で入植者を募ってくれることになりました。応募者がいれば、およそ{3}後に到着します。友好値 -{2}。</Recruitment_StartedDirect>
+  <Recruitment_Reason_FactionHostile>敵対している派閥です</Recruitment_Reason_FactionHostile>
+  <Recruitment_Reason_Goodwill>友好値が0を下回ります（必要 {0}、現在 {1}）</Recruitment_Reason_Goodwill>
+  <Recruitment_Reason_DirectPending>この派閥への前回の依頼の結果がまだ出ていません</Recruitment_Reason_DirectPending>
+  <Recruitment_Reason_NeedsPermit>{0}は、交易に必要な爵位を持つ入植者がいる入植地にしか入植者を送りません</Recruitment_Reason_NeedsPermit>
+  <Recruitment_Reason_GoodwillLocked>今はこの派閥との友好値が変わらない状態です</Recruitment_Reason_GoodwillLocked>
 
   <!-- 使者 -->
 
@@ -56,16 +94,26 @@
   <Recruitment_Tab_Waiting>判断待ちの応募者</Recruitment_Tab_Waiting>
   <Recruitment_Tab_Methods>募集方式</Recruitment_Tab_Methods>
   <Recruitment_Tab_None>なし</Recruitment_Tab_None>
-  <Recruitment_Tab_DriveLine>{0}（{1}、応募者は{2}）: {3}</Recruitment_Tab_DriveLine>
+  <Recruitment_Tab_DriveDetails>出身: {0} → 到着先: {1} ／ 上乗せ: {2}</Recruitment_Tab_DriveDetails>
+  <Recruitment_Tab_DirectMark>（直接依頼）</Recruitment_Tab_DirectMark>
   <Recruitment_Tab_MapLost>拠点が失われたため別の拠点へ</Recruitment_Tab_MapLost>
   <Recruitment_Tab_ArrivesIn>到着まで {0}</Recruitment_Tab_ArrivesIn>
-  <Recruitment_Tab_GroupLine>{1}の応募者{0}人、残り{2}</Recruitment_Tab_GroupLine>
+  <Recruitment_Tab_GroupTitle>応募者{0}人</Recruitment_Tab_GroupTitle>
+  <Recruitment_Tab_TimeLeft>判断の残り {0}</Recruitment_Tab_TimeLeft>
   <Recruitment_Tab_Review>確認する</Recruitment_Tab_Review>
+  <Recruitment_Tab_MethodsOn>今のマップ（{0}）で使えるか:</Recruitment_Tab_MethodsOn>
   <Recruitment_Tab_MethodLine>{0}: {1}シルバー、{2}〜{3}日</Recruitment_Tab_MethodLine>
-  <Recruitment_Tab_NeedsResearch>（研究が必要: {0}）</Recruitment_Tab_NeedsResearch>
+  <Recruitment_Tab_Usable>使えます</Recruitment_Tab_Usable>
+  <Recruitment_Tab_Unusable>使えません</Recruitment_Tab_Unusable>
   <Recruitment_Tab_HowTo_Trader>入植者を選択して、来訪中の商人を右クリックします。</Recruitment_Tab_HowTo_Trader>
   <Recruitment_Tab_HowTo_Envoy>シルバーを持たせてキャラバンを編成し、ワールドマップで敵対していない拠点を右クリックします（拠点を訪問中なら、キャラバンのボタンからも依頼できます）。</Recruitment_Tab_HowTo_Envoy>
-  <Recruitment_Tab_HowTo_CommsConsole>入植者を選択して電力の通った通信機を右クリックし、「入植者募集を呼びかける」を選びます。</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_HowTo_CommsConsole>入植者を選択して電力の通った通信機を右クリックし、「入植者募集を呼びかける」を選びます。特定の派閥に頼むときは、その派閥との通信を開きます。</Recruitment_Tab_HowTo_CommsConsole>
+  <Recruitment_Tab_Factions>派閥と拠点</Recruitment_Tab_Factions>
+  <Recruitment_Tab_FactionLine>{0}: 友好値 {1}（{2}）</Recruitment_Tab_FactionLine>
+  <Recruitment_Tab_DirectAvailable>通信機から直接依頼できます（友好値{0}）</Recruitment_Tab_DirectAvailable>
+  <Recruitment_Tab_DirectPending>直接依頼の結果待ち</Recruitment_Tab_DirectPending>
+  <Recruitment_Tab_Cooldowns>最近依頼した拠点: {0}</Recruitment_Tab_Cooldowns>
+  <Recruitment_Tab_CooldownEntry>{0}（あと{1}）</Recruitment_Tab_CooldownEntry>
 
   <!-- 設定 -->
   <Recruitment_Settings_General>全般</Recruitment_Settings_General>
@@ -78,20 +126,24 @@
   <Recruitment_Settings_IncludePermanentEnemiesDesc>海賊など。初期設定はオフです。</Recruitment_Settings_IncludePermanentEnemiesDesc>
   <Recruitment_Settings_AllowChildren>子供の応募を許可する</Recruitment_Settings_AllowChildren>
   <Recruitment_Settings_AllowChildrenDesc>ストーリーテラーの設定で子供が許可されている場合のみ有効です。</Recruitment_Settings_AllowChildrenDesc>
-  <Recruitment_Settings_ConfirmExpensive>高額な募集の開始前に確認する</Recruitment_Settings_ConfirmExpensive>
-  <Recruitment_Settings_ConfirmExpensiveDesc>費用が下の額以上の募集を始める前に、費用・期間・到着方法を表示して確認します。0にすると常に確認します。</Recruitment_Settings_ConfirmExpensiveDesc>
-  <Recruitment_Settings_ConfirmThreshold>確認するシルバーの額（以上）</Recruitment_Settings_ConfirmThreshold>
   <Recruitment_Settings_Applicants>応募者の人数</Recruitment_Settings_Applicants>
+  <Recruitment_Settings_ApplicantsDesc>募集を始めた入植者（商人と話した人、キャラバンの交渉役、通信機を使った人）の社交スキルに応じて、この2組の確率の間を直線的に変化します。</Recruitment_Settings_ApplicantsDesc>
+  <Recruitment_Settings_AtSocialZero>社交0のとき</Recruitment_Settings_AtSocialZero>
+  <Recruitment_Settings_AtSocialMax>社交20のとき</Recruitment_Settings_AtSocialMax>
+  <Recruitment_Settings_AtSocialTen>社交10のとき: {0}</Recruitment_Settings_AtSocialTen>
   <Recruitment_Settings_ApplicantWeight>{0}人: 重み {1}（{2}）</Recruitment_Settings_ApplicantWeight>
+  <Recruitment_Settings_Score>シルバーの上乗せ: 候補の評価</Recruitment_Settings_Score>
+  <Recruitment_Settings_ScoreDesc>上乗せをしたときは、評価が最も高い候補が来ます。評価は、技能レベルの上位{0}つの合計に、情熱の点を足し、できない仕事1つごと・健康上の問題1つごとの点を引いたものです。</Recruitment_Settings_ScoreDesc>
+  <Recruitment_Settings_ScoreMinorPassion>情熱（小）: +{0}</Recruitment_Settings_ScoreMinorPassion>
+  <Recruitment_Settings_ScoreMajorPassion>情熱（大）: +{0}</Recruitment_Settings_ScoreMajorPassion>
+  <Recruitment_Settings_ScoreIncapable>できない仕事1つごと: -{0}</Recruitment_Settings_ScoreIncapable>
+  <Recruitment_Settings_ScoreHealth>健康上の問題1つごと: -{0}</Recruitment_Settings_ScoreHealth>
   <Recruitment_Settings_Methods>費用と期間</Recruitment_Settings_Methods>
   <Recruitment_Settings_Cost>シルバー</Recruitment_Settings_Cost>
   <Recruitment_Settings_MinDays>最短日数</Recruitment_Settings_MinDays>
   <Recruitment_Settings_MaxDays>最長日数</Recruitment_Settings_MaxDays>
   <Recruitment_Settings_MinAboveMax>最短が最長を上回っています。両者を入れ替えて扱います。</Recruitment_Settings_MinAboveMax>
   <Recruitment_Settings_Envoy>拠点での募集依頼</Recruitment_Settings_Envoy>
-  <Recruitment_Settings_EnvoyZeroAtZero>社交0での応募者0人の確率: {0}</Recruitment_Settings_EnvoyZeroAtZero>
-  <Recruitment_Settings_EnvoyZeroPerLevel>社交1レベルごとのその確率の低下: {0}</Recruitment_Settings_EnvoyZeroPerLevel>
-  <Recruitment_Settings_EnvoyPreview>応募者0人の確率: 社交0: {0} ／ 社交10: {1} ／ 社交20: {2}</Recruitment_Settings_EnvoyPreview>
   <Recruitment_Settings_Reset>初期設定に戻す</Recruitment_Settings_Reset>
 
   <Recruitment_Reason_NoNegotiator>キャラバンに、この派閥と交渉できる人がいません</Recruitment_Reason_NoNegotiator>
@@ -126,7 +178,9 @@
 
   <Recruitment_Alert_ShortOfSilver>使者のキャラバンのシルバー不足</Recruitment_Alert_ShortOfSilver>
 
-  <Recruitment_Alert_ShortOfSilverDesc>次のキャラバンは拠点に入植者の募集を依頼しに向かっていますが、依頼に必要な{0}シルバーを持っていません。</Recruitment_Alert_ShortOfSilverDesc>
+  <Recruitment_Alert_ShortOfSilverDesc>次のキャラバンは拠点に入植者の募集を依頼しに向かっていますが、依頼に必要なシルバー（上乗せを含む）を持っていません。\n\n{0}</Recruitment_Alert_ShortOfSilverDesc>
+
+  <Recruitment_Alert_ShortOfSilverLine>{0}: 必要 {1}、所持 {2}</Recruitment_Alert_ShortOfSilverLine>
 
   <Recruitment_Settings_EnvoyCooldown>同じ拠点に再び依頼できるまでの日数: {0}</Recruitment_Settings_EnvoyCooldown>
 
