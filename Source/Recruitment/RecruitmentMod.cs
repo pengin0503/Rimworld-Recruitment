@@ -32,7 +32,10 @@ namespace Recruitment
             RecruitmentSettings s = Settings;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
-            var listing = new Listing_Standard();
+            // One column only: by default a Listing starts a new column (to the right, outside the view) once
+            // its content passes the rect's height. CurHeight then measures only that last column, so the view
+            // shrinks every frame until nothing past the first heading is visible.
+            var listing = new Listing_Standard { maxOneColumn = true };
             listing.Begin(viewRect);
 
             Heading(listing, "Recruitment_Settings_General");
